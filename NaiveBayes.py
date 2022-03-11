@@ -41,6 +41,7 @@ def classify(csvdoc, p_v, probs_calc):
                     if int(el) == 0:
                         continue
                     else:
+                        #Matrix multiplication possibly?
                         Map_calc = Map_calc + row[idxrow] * int(el)
                 Map_calc = Map_calc + p_v[row_count]
                 print(Map_calc)
@@ -51,18 +52,15 @@ def classify(csvdoc, p_v, probs_calc):
                 Map_calc = 0
             row_count = 0
             file_object.write(str(testid) + ","+str(max_idx)+'\n')
-            print(max_prob)
-            print(max_idx)
             max_prob = -10000
             max_idx = 0
 
 
-
-
-
 Vocabulary = 61188
 beta = 1/Vocabulary
+#array for MLE P(Yk) for each class 1 x 20
 p_v = []
+#array for MaP for P(X|Y) for each class Size 20 x 61188
 prob_calcs = []
 text_matrix, total_rows = csv_to_sparse('training.csv', 61190)
 for classnum in range(1, 21):
@@ -73,7 +71,6 @@ for classnum in range(1, 21):
     probs = math.log2(num_rows/total_rows)
     p_v.append(probs)
     man_data = text_matrix[filtered_matrix_list, :].sum(axis=0).tolist()[0]
-
     del man_data[0]
     del man_data[-1]
     total_words = sum(man_data)
@@ -83,8 +80,7 @@ for classnum in range(1, 21):
     prob_bayes = vfunc(man_data)
     print(prob_bayes)
     prob_calcs.append(prob_bayes)
-print(p_v)
-print(prob_calcs)
+
 
 
 
