@@ -12,18 +12,16 @@ import statistics as st
 def to_sparse_mat(file):
     csv = np.genfromtxt (file, delimiter=",")
     numpy_array = csv[:,1:]
-    print("1",numpy_array,"\n")
+    #Build Y as described in Proj. 2 description
     Y = numpy_array[:,-1]
-    print("2",Y,"\n")
-
     numpy_array = numpy_array[:,:-1]
-    print("3",numpy_array,"\n")
-
     rows, columns = numpy_array.shape
     ones = np.ones((rows,1))
-    print("ONES",ones,"\n")
+    #X as described in Proj. 2 description
     final_array = np.append(ones,numpy_array,1)
-    print("4",final_array,"\n")
-
+    #k as described in Proj. 2 description
+    unique_classes = len(np.unique(Y))
+    #init delta as described in Proj. 2 description (k x m matrix of zeros)
+    delta=np.zeros((unique_classes,columns))
 
     
