@@ -30,3 +30,11 @@ def to_sparse_mat(file):
     Y = csr_matrix(Y_np)
     delta_sparse = csr_matrix(delta)
     
+    #Prelim Grad descent. Need to work out P(Y|W,X) and lambda
+def grad_descent(X, Y, delta, lamb, learning_rate, iterations):
+    rows, columns = X.shape
+    W = np.zeros((len(np.unique(Y)),columns))
+    for i in range(0,iterations):
+        #P(Y|W,X) = exp(WX^t)    
+        #W = W+ (learning_rate)*((delta-P(Y|W,X))*X-lWT)
+        print("Not complete")
