@@ -21,6 +21,8 @@ def to_sparse_mat(file):
     ones = np.ones((rows,1))
     #X as described in Proj. 2 description
     final_array = np.append(ones,numpy_array,1)
+    #Normalized array
+    final_array = final_array/final_array.sum(axis=0,keepdims=1)
     #k as described in Proj. 2 description
     unique_classes = len(np.unique(Y_np))
     #init delta as described in Proj. 2 description (k x m matrix of zeros)
@@ -33,7 +35,7 @@ def to_sparse_mat(file):
     #Prelim Grad descent. Need to work out P(Y|W,X) and lambda
 def grad_descent(X, Y, delta, lamb, learning_rate, iterations):
     rows, columns = X.shape
-    W = np.zeros((len(np.unique(Y)),columns))
+    W = np.random.rand((len(np.unique(Y)),columns))
     for i in range(0,iterations):
         #P(Y|W,X) = exp(WX^t)    
         #W = W+ (learning_rate)*((delta-P(Y|W,X))*X-lWT)

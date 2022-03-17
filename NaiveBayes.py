@@ -42,6 +42,8 @@ def classify(csvdoc, p_v, probs_calc):
                         continue
                     else:
                         #Matrix multiplication possibly?
+                        ## csr_A.multiply(csr_B) will do matrix multiplication between
+                        ##the two sparse matrices. 
                         Map_calc = Map_calc + row[idxrow] * int(el)
                 Map_calc = Map_calc + p_v[row_count]
                 print(Map_calc)
