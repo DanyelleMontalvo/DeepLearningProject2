@@ -39,14 +39,15 @@ def to_sparse_mat(file):
     return X, Y, delta_sparse
     
     #Prelim Grad descent. Need to work out P(Y|W,X) and lambda
+    #need to get delta update implemented (I believe using sigma func.)
 def grad_descent(X, Y, delta, lamb, learning_rate, iterations):
     rows, columns = X.shape
     W = np.random.rand(len(np.unique(Y)),columns)
     for i in range(0,iterations):
         Ps = np.matmul(W,(X.T))
-        W = W+ (learning_rate)*(np.matmul(delta-Ps,X)-lamb*W)
+        W = W + learning_rate*(np.matmul((delta-Ps,X))-lamb*W)
         print("W ",i) 
         print(W)
 if __name__ == "__main__":
      results = to_sparse_mat("test.csv")
-     grad_descent(results[0], results[1], results[2], .1, .001, 10)
+     grad_descent(results[0], results[1], results[2], .001, .001, 1000)
