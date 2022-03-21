@@ -26,17 +26,27 @@ def to_sparse_mat(file):
     #k as described in Proj. 2 description
     unique_classes = len(np.unique(Y_np))
     #init delta as described in Proj. 2 description (k x m matrix of zeros)
-    delta=np.zeros((unique_classes,columns))
+    delta=np.zeros((unique_classes,rows))
     #Sparse versions of matrices
-    X = csr_matrix(final_array)
-    Y = csr_matrix(Y_np)
-    delta_sparse = csr_matrix(delta)
+    # X = csr_matrix(final_array)
+    # Y = csr_matrix(Y_np.T)
+    # delta_sparse = csr_matrix(delta)
+    
+    #NumPy versions of Matrices. These handled dense-sparse multiplication better. Will look into further
+    X = (final_array)
+    Y = (Y_np.T)
+    delta_sparse = (delta)
+    return X, Y, delta_sparse
     
     #Prelim Grad descent. Need to work out P(Y|W,X) and lambda
 def grad_descent(X, Y, delta, lamb, learning_rate, iterations):
     rows, columns = X.shape
-    W = np.random.rand((len(np.unique(Y)),columns))
+    W = np.random.rand(len(np.unique(Y)),columns)
     for i in range(0,iterations):
-        #P(Y|W,X) = exp(WX^t)    
-        #W = W+ (learning_rate)*((delta-P(Y|W,X))*X-lWT)
-        print("Not complete")
+        Ps = np.matmul(W,(X.T))
+        W = W+ (learning_rate)*(np.matmul(delta-Ps,X)-lamb*W)
+        print("W ",i) 
+        print(W)
+if __name__ == "__main__":
+     results = to_sparse_mat("test.csv")
+     grad_descent(results[0], results[1], results[2], .1, .001, 10)
