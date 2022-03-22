@@ -26,7 +26,8 @@ def to_sparse_mat(file):
     #k as described in Proj. 2 description
     unique_classes = len(np.unique(Y_np))
     #init delta as described in Proj. 2 description (k x m matrix of zeros)
-    delta=np.zeros((unique_classes,rows))
+    delta=np.ones((unique_classes,rows))
+    
     #Sparse versions of matrices
     # X_sparse = csr_matrix(final_array)
     # Y_sparse = csr_matrix(Y_np.T)
@@ -48,8 +49,9 @@ def grad_descent(X, Y, delta, lamb, learning_rate, iterations):
     #W_sparse = csr_matrix(W)
     for i in range(0,iterations):
         Ps = np.matmul(W,(X.T))
+        Ps = np.exp(Ps)
         #Psparse = W_sparse.multiply(X.T)
-        W = W + learning_rate*(np.matmul((delta-Ps,X))-lamb*W)
+        W = W + learning_rate*(np.matmul(delta-Ps,X)-lamb*W)
         #W_sparse = W_sparse + learning_rate*(((delta-Psparse).multiply(X))-lamb*W_sparse)
 
         print("W ",i) 
