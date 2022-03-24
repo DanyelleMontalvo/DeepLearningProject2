@@ -26,7 +26,7 @@ def to_sparse_mat(file):
     #k as described in Proj. 2 description
     unique_classes = len(np.unique(Y_np))
     #init delta as described in Proj. 2 description (k x m matrix of zeros)
-    delta=np.ones((unique_classes,rows))
+    delta=np.zeros((unique_classes,rows))
     
     #Sparse versions of matrices
     # X_sparse = csr_matrix(final_array)
