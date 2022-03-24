@@ -43,6 +43,7 @@ def to_sparse_mat(file):
     #Prelim Grad descent. Need to work out P(Y|W,X) and lambda
     #need to get delta update implemented (I believe using sigma func.)
     # Having shape issues when doing dense-sparse mat mult with csr_mat. have NumPy set up though
+
 def grad_descent(X, Y, delta, lamb, learning_rate, iterations):
     rows, columns = X.shape
     W = np.random.rand(len(np.unique(Y)),columns)
@@ -54,8 +55,31 @@ def grad_descent(X, Y, delta, lamb, learning_rate, iterations):
         W = W + learning_rate*(np.matmul(delta-Ps,X)-lamb*W)
         #W_sparse = W_sparse + learning_rate*(((delta-Psparse).multiply(X))-lamb*W_sparse)
 
-        print("W ",i) 
-        print(W)
+        #print("W ",i) 
+        #print(W)
+
+    return W
+
 if __name__ == "__main__":
      results = to_sparse_mat("test.csv")
-     grad_descent(results[0], results[1], results[2], .001, .001, 1000)
+     W = grad_descent(results[0], results[1], results[2], .001, .001, 1000)
+
+     #Solve exp(W * Xt) and set the bottom row to 1's
+     probMatrix = np.exp(np.matmul(W, np.matrix.transpose(results[0])))
+     probMatrix[len(probMatrix)-1] = np.ones_like(probMatrix[0])
+
+     #Normalize each column
+     for col in range(len(probMatrix[0])):
+        sum = 0
+        for i in range(len(probMatrix)):
+            sum += probMatrix[i][col]
+
+        for i in range(len(probMatrix)):
+            probMatrix[i][col] /= sum
+
+    #Classify using this matrix
+    
+
+     print(probMatrix)
+
+     
