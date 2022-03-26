@@ -2,8 +2,14 @@ import math
 import numpy as np
 import csv
 from scipy.sparse import csr_matrix
+import datetime
 
 def csv_to_sparse(csvdoc, colnum):
+    """
+    Function to turn csv into a sparse matrix
+    input csvdoc: csv file
+    output: returns the sparse Matrix and a rowcount
+    """
     col_count = []
     row_count = []
     data_count = []
@@ -24,12 +30,18 @@ def csv_to_sparse(csvdoc, colnum):
     return new_matrix, rowcount
 
 def classify(csvdoc, p_v, probs_calc):
+    """
+    Function to classify an input
+    input csvdoc: an input file that contains data to be classified
+    input p_v: The array of probabilities
+    input probs_calc:
+    """
     testid = 0
     max_prob = -100000
     max_idx = 0
     Map_calc = 0
     row_count = 0
-    file_object = open('sample.csv', 'w+')
+    file_object = open('classified.csv', 'w+')
     file_object.write("id,class\n")
     with open(csvdoc, newline='', encoding='utf-8-sig') as csvfile:
         csvreader = csv.reader(csvfile, delimiter=',')
@@ -38,6 +50,7 @@ def classify(csvdoc, p_v, probs_calc):
             del training_row[0]
             for idx, row in enumerate(probs_calc):
                 for idxrow, el in enumerate(training_row):
+
                     if int(el) == 0:
                         continue
                     else:
@@ -46,7 +59,6 @@ def classify(csvdoc, p_v, probs_calc):
                         ##the two sparse matrices. 
                         Map_calc = Map_calc + row[idxrow] * int(el)
                 Map_calc = Map_calc + p_v[row_count]
-                print(Map_calc)
                 row_count = row_count + 1
                 if Map_calc > max_prob:
                     max_prob = Map_calc
@@ -57,9 +69,9 @@ def classify(csvdoc, p_v, probs_calc):
             max_prob = -10000
             max_idx = 0
 
-
 Vocabulary = 61188
-beta = 1/Vocabulary
+#beta = 1/Vocabulary
+beta= 1
 #array for MLE P(Yk) for each class 1 x 20
 p_v = []
 #array for MaP for P(X|Y) for each class Size 20 x 61188
@@ -80,9 +92,7 @@ for classnum in range(1, 21):
     func = lambda x: math.log2((x + beta)/(total_words + 1))
     vfunc = np.vectorize(func)
     prob_bayes = vfunc(man_data)
-    print(prob_bayes)
     prob_calcs.append(prob_bayes)
-
 
 
 
