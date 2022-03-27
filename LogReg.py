@@ -9,17 +9,33 @@ import numpy as np
 import csv
 import statistics as st
 from scipy.sparse import csr_matrix
+import pandas as pd
+from sklearn.preprocessing import normalize
 
 
 def to_sparse_mat(file):
-    csv = np.genfromtxt (file, delimiter=",")
+    
+    col_count = []
+    row_count = []
+    data_count = []
+    rowcount = 0
+    #code incorporated from from https://docs.python.org/3/library/csv.html
+    #Thanks Danyelle (:
+    with open(file, newline='', encoding='utf-8-sig') as csvfile:
+        csvreader = csv.reader(csvfile, delimiter=',')
+        for row in csvreader:
+            for idx, el in enumerate(row):
+                if int(el) == 0:
+                    continue
+                else:
+                    row_count.append(rowcount)
+                    col_count.append(idx)
+                    data_count.append(int(el))
+            rowcount = rowcount + 1
+    new_matrix = csr_matrix((data_count, (row_count, col_count)), shape=(rowcount, 61190))
+    numpy_array = new_matrix.todense()
+    
 
-    # with open(file, newline='') as csvfile:
-    #     reader = csv.reader(csvfile)
-    #     for row in reader:
-
-    numpy_array = csv[:,1:]
-    print(numpy_array)
     #Build Y as described in Proj. 2 description
     Y_np = numpy_array[:,-1]
     numpy_array = numpy_array[:,:-1]
@@ -28,53 +44,58 @@ def to_sparse_mat(file):
     #X as described in Proj. 2 description
     final_array = np.append(ones,numpy_array,1)
     #Normalized array
-    final_array = final_array/final_array.sum(axis=0,keepdims=1)
     #k as described in Proj. 2 description
     unique_classes = len(np.unique(Y_np))
     #init delta as described in Proj. 2 description (k x m matrix of zeros)
-    delta=np.zeros((unique_classes,rows))
+    delta=np.ones((unique_classes,rows))
     
     #Sparse versions of matrices
-    # X_sparse = csr_matrix(final_array)
-    # Y_sparse = csr_matrix(Y_np.T)
-    # delta_sparse = csr_matrix(delta)
+    X_sparse = csr_matrix(final_array)
+    Y_sparse = csr_matrix(Y_np.T)
+    delta_sparse = csr_matrix(delta)
     
     #NumPy versions of Matrices. These handled dense-sparse multiplication better. Will look into further
-    X = (final_array)
-    Y = (Y_np.T)
-    delta_sparse = (delta)
-    #return X_sparse, Y_sparse, delta_sparse
-    return X, Y, delta_sparse
+    # X = (final_array)
+    # Y = (Y_np.T)
+    # delta_sparse = (delta)
+    print(X_sparse)
+    return X_sparse, Y_sparse, delta_sparse
+    #return X, Y, delta_sparse
     
     #Prelim Grad descent. Need to work out P(Y|W,X) and lambda
     #need to get delta update implemented (I believe using sigma func.)
     # Having shape issues when doing dense-sparse mat mult with csr_mat. have NumPy set up though
 
+#As written (the non-commented bits) assumes sparse matrix inputs
 def grad_descent(X, Y, delta, lamb, learning_rate, iterations):
     rows, columns = X.shape
     W = np.random.rand(len(np.unique(Y)),columns)
-    #W_sparse = csr_matrix(W)
+    W_sparse = csr_matrix(W)
     for i in range(0,iterations):
-        Ps = np.matmul(W,(X.T))
-        Ps = np.exp(Ps)
-
+        # Ps = np.matmul(W,(X.T))
+        # Ps = np.exp(Ps)
+        Psparse = W_sparse.dot(X)
         #Set bottom row to 1's and normalize each column
-        Ps[len(Ps)-1] = np.ones_like(Ps[0])
-        for col in range(len(Ps[0])):
-            sum = 0
-            for i in range(len(Ps)):
-                sum += Ps[i][col]
-            for i in range(len(Ps)):
-                Ps[i][col] /= sum
+        Psparse = Psparse.tolil()
+        Psparse[-1, :] = 1
+        Psparse = Psparse.tocsr()
+       # Ps[len(Ps)-1] = np.ones_like(Ps[0])
+        #Sparse normalize
+        Psparse = normalize(Psparse,norm = 'l2')
+        # for col in range(len(Ps[0])):
+        #     sum = 0
+        #     for i in range(len(Ps)):
+        #         sum += Ps[i][col]
+        #     for i in range(len(Ps)):
+        #         Ps[i][col] /= sum
 
-        #Psparse = W_sparse.multiply(X.T)
-        W = W + learning_rate*(np.matmul(delta-Ps,X)-lamb*W)
-        #W_sparse = W_sparse + learning_rate*(((delta-Psparse).multiply(X))-lamb*W_sparse)
+        #W = W + learning_rate*(np.matmul(delta-Ps,X)-lamb*W)
+        W_sparse = W_sparse + learning_rate*(((delta-Psparse).dot(X))-lamb*W_sparse)
 
-        #print("W ",i) 
-        #print(W)
+       
 
-    return W
+    return W_sparse
+
 
 
 def classify(file, Y, W):
@@ -118,6 +139,6 @@ def classify(file, Y, W):
                 solout.writerow(ans)
 
 if __name__ == "__main__":
-    results = to_sparse_mat("test_train.csv")
-    W = grad_descent(results[0], results[1], results[2], .001, .001, 1000)
-    classify("test_tester.csv", results[1], W)
+    results = to_sparse_mat("/home/jared/Downloads/training.csv")
+    #W = grad_descent(results[0], results[1], results[2], .001, .001, 1000)
+    #classify("/home/jared/Downloads/training.csv", results[1], W)
