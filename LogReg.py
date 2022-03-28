@@ -70,7 +70,6 @@ def to_sparse_mat(file):
     # X = (final_array)
     # Y = (Y_np.T)
     # delta_sparse = (delta)
-    print(delta)
     return X_sparse, Y_sparse, delta_sparse, unique_classes
     #return X, Y, delta_sparse
     
@@ -81,13 +80,13 @@ def to_sparse_mat(file):
 #As written (the non-commented bits) assumes sparse matrix inputs
 def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
     rows, columns = X.shape
-    
+    X = X.T
     #W = np.random.rand(unique_classes,columns)
     W_sparse = sparse.rand(unique_classes,columns)
     for i in range(0,iterations):
         # Ps = np.matmul(W,(X.T))
         # Ps = np.exp(Ps)
-        Psparse = W_sparse.dot(X.T)
+        Psparse = W_sparse.dot(X)
         #Set bottom row to 1's and normalize each column
         Psparse = Psparse.tolil()
         Psparse[-1, :] = 1
@@ -105,7 +104,6 @@ def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
         #W = W + learning_rate*(np.matmul(delta-Ps,X)-lamb*W)
         W_sparse = W_sparse + learning_rate*(((delta-Psparse).dot(X))-lamb*W_sparse)
 
-    print(W_sparse.shape,"D",delta)
     return W_sparse
 
 
