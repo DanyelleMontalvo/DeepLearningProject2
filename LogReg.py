@@ -33,7 +33,7 @@ def to_sparse_mat(file):
                     col_count.append(idx)
                     data_count.append(int(el))
             rowcount = rowcount + 1
-    new_matrix = csr_matrix((data_count, (row_count, col_count)), shape=(rowcount, 16))
+    new_matrix = csr_matrix((data_count, (row_count, col_count)), shape=(rowcount, 61190))
     numpy_array = new_matrix.todense()
 
     #Build Y as described in Proj. 2 description
@@ -109,18 +109,35 @@ def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
     return W_sparse
 
 
-
 def classify(file, Y, W):
-    Y = Y.todense()
-    Y = list(set(Y))
-    
+    """
+    Classifies testing data using set of weights W. 
+    Uses equations 27 and 28 from Mitchell Ch.3.
+
+    Parameters
+    ----------
+    file : str
+        Filename of the test data
+
+    Y : list
+        List of unique classes
+
+    W : list
+        List of weights
+    """
+
     with open(file, newline='') as test_data:
         with open('solution.csv', 'w', newline='') as solution:
             data_reader = csv.reader(test_data)
             solout = csv.writer(solution)
             solout.writerow(['id', 'class'])
 
+            #Simple counter for runtime
+            count = 1
             for example in data_reader:
+                print("Classifying row", count)
+                count += 1
+
                 X = example[1:]
                 X = [int(x) for x in X]
 
@@ -129,6 +146,7 @@ def classify(file, Y, W):
                 K = len(Y) - 1
                 n = len(X) - 1
                 for k, y in enumerate(Y):
+                    #Separate equations for k == K and k != K
                     if k != K:
                         num = np.exp(W[k][0] + sum(W[k][i] * X[i] for i in range(n)))
                         denom = 1
@@ -146,12 +164,18 @@ def classify(file, Y, W):
                         probs.append(p)
 
                 idx = np.argmax(probs)
-                ans = [int(example[0]), int(Y[idx])]
+                ans = [int(example[0]), int(Y[idx][0])]
 
+                #Print answer pairs and write to csv
                 print(ans)
                 solout.writerow(ans)
 
 if __name__ == "__main__":
-    results = to_sparse_mat("test_train.csv")
+    results = to_sparse_mat("training.csv")
     W = grad_descent(results[0], results[1], results[3], results[2], .001, .001, 10)
-    #classify("/home/jared/Downloads/training.csv", results[1], W)
+
+    #Converting Y and W formatting for classification
+    Y = results[1].todense().tolist()[0]
+    Y = [[y] for y in Y]
+    W = W.todense().tolist()
+    classify("testing.csv", Y, W)
