@@ -44,7 +44,6 @@ def to_sparse_mat(file):
     unique_classes = unique_classes[1]
     delta=np.zeros((unique_classes,rows))
     for r in numpy_array[:,-1]:
-        print(r)
         for c in range(0,rows):
             if(r==numpy_array[c,-1]):
                 delta[r-1,c] =1
@@ -69,7 +68,7 @@ def to_sparse_mat(file):
     #NumPy versions of Matrices. These handled dense-sparse multiplication better. Will look into further
     # X = (final_array)
     # Y = (Y_np.T)
-    # delta_sparse = (delta)
+    print("Done w/ conv\n")
     return X_sparse, Y_sparse, delta_sparse, unique_classes
     #return X, Y, delta_sparse
     
@@ -80,17 +79,25 @@ def to_sparse_mat(file):
 #As written (the non-commented bits) assumes sparse matrix inputs
 def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
     rows, columns = X.shape
-    X = X.T
-    #W = np.random.rand(unique_classes,columns)
+    X_t = X.T
     W_sparse = sparse.rand(unique_classes,columns)
-    for i in range(0,iterations):
+    Psparse = W_sparse.dot(X_t)
+    Psparse = Psparse.tolil()
+    Psparse[-1, :] = 1
+    Psparse = Psparse.tocsr()
+    Psparse = normalize(Psparse,norm = 'l2')
+    W_sparse = W_sparse + learning_rate*(((delta-Psparse).dot(X))-lamb*W_sparse)
+
+    #W = np.random.rand(unique_classes,columns)
+    for i in range(1,iterations):
+        print("iter", i)
         # Ps = np.matmul(W,(X.T))
         # Ps = np.exp(Ps)
-        Psparse = W_sparse.dot(X)
+        Psparse = W_sparse.dot(X_t)
         #Set bottom row to 1's and normalize each column
-        Psparse = Psparse.tolil()
-        Psparse[-1, :] = 1
-        Psparse = Psparse.tocsr()
+        #Psparse = Psparse.tolil()
+        #Psparse[-1, :] = 1
+        #Psparse = Psparse.tocsr()
        # Ps[len(Ps)-1] = np.ones_like(Ps[0])
         #Sparse normalize
         Psparse = normalize(Psparse,norm = 'l2')
@@ -103,7 +110,7 @@ def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
 
         #W = W + learning_rate*(np.matmul(delta-Ps,X)-lamb*W)
         W_sparse = W_sparse + learning_rate*(((delta-Psparse).dot(X))-lamb*W_sparse)
-
+    print("Done w/ GD\n")
     return W_sparse
 
 
@@ -169,7 +176,7 @@ def classify(file, Y, W):
                 solout.writerow(ans)
 
 if __name__ == "__main__":
-    results = to_sparse_mat("training.csv")
+    results = to_sparse_mat("/home/jared/Downloads/training.csv")
     W = grad_descent(results[0], results[1], results[3], results[2], .001, .001, 10)
 
     #Converting Y and W formatting for classification
