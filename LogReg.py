@@ -9,6 +9,7 @@ import numpy as np
 import csv
 import statistics as st
 from scipy.sparse import csr_matrix
+from scipy import sparse 
 import pandas as pd
 from sklearn.preprocessing import normalize
 
@@ -32,7 +33,7 @@ def to_sparse_mat(file):
                     col_count.append(idx)
                     data_count.append(int(el))
             rowcount = rowcount + 1
-    new_matrix = csr_matrix((data_count, (row_count, col_count)), shape=(rowcount, 61190))
+    new_matrix = csr_matrix((data_count, (row_count, col_count)), shape=(rowcount, 16))
     numpy_array = new_matrix.todense()
 
     #Build Y as described in Proj. 2 description
@@ -43,6 +44,7 @@ def to_sparse_mat(file):
     unique_classes = unique_classes[1]
     delta=np.zeros((unique_classes,rows))
     for r in numpy_array[:,-1]:
+        print(r)
         for c in range(0,rows):
             if(r==numpy_array[c,-1]):
                 delta[r-1,c] =1
@@ -80,8 +82,8 @@ def to_sparse_mat(file):
 def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
     rows, columns = X.shape
     
-    W = np.random.rand(unique_classes,columns)
-    W_sparse = csr_matrix(W)
+    #W = np.random.rand(unique_classes,columns)
+    W_sparse = sparse.rand(unique_classes,columns)
     for i in range(0,iterations):
         # Ps = np.matmul(W,(X.T))
         # Ps = np.exp(Ps)
@@ -103,16 +105,13 @@ def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
         #W = W + learning_rate*(np.matmul(delta-Ps,X)-lamb*W)
         W_sparse = W_sparse + learning_rate*(((delta-Psparse).dot(X))-lamb*W_sparse)
 
-       
-
+    print(W_sparse.shape)
     return W_sparse
 
 
 
 def classify(file, Y, W):
-    #I'm pretty sure this is necessary based on below implementation
     Y = Y.todense()
-    W = W.todense()
     Y = list(set(Y))
     
     with open(file, newline='') as test_data:
@@ -153,6 +152,6 @@ def classify(file, Y, W):
                 solout.writerow(ans)
 
 if __name__ == "__main__":
-    results = to_sparse_mat("/home/jared/Downloads/training.csv")
+    results = to_sparse_mat("test_train.csv")
     W = grad_descent(results[0], results[1], results[3], results[2], .001, .001, 10)
-    classify("/home/jared/Downloads/training.csv", results[1], W)
+    #classify("/home/jared/Downloads/training.csv", results[1], W)
