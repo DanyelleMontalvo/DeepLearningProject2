@@ -110,7 +110,9 @@ def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
 
 
 def classify(file, Y, W):
+    #I'm pretty sure this is necessary based on below implementation
     Y = Y.todense()
+    W = W.todense()
     Y = list(set(Y))
     
     with open(file, newline='') as test_data:
