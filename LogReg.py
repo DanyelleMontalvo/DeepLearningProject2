@@ -33,7 +33,7 @@ def to_sparse_mat(file):
                     col_count.append(idx)
                     data_count.append(int(el))
             rowcount = rowcount + 1
-    new_matrix = csr_matrix((data_count, (row_count, col_count)), shape=(rowcount, 61190))
+    new_matrix = csr_matrix((data_count, (row_count, col_count)), shape=(rowcount, 16))
     numpy_array = new_matrix.todense()
 
     #Build Y as described in Proj. 2 description
@@ -82,24 +82,26 @@ def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
     rows, columns = X.shape
     X_t = X.transpose()
     W_sparse = sparse.rand(unique_classes,columns)
-    print("1 ")
+    print("1")
     Psparse = W_sparse.dot(X_t)
-    print("2 ")
+    print("2")
     Psparse = Psparse.tolil()
-    print("3 ")
+    print("3")
     Psparse[-1, :] = 1
-    print("4 ")
+    print("4")
     Psparse = Psparse.tocsr()
-    print("5 ")
+    print("5")
     Psparse = normalize(Psparse,norm = 'l2')
-    print("6 ")
+    print("6")
     L_W = W_sparse.multiply(lamb)
-    print("7 ")
+    print("7")
     delta_P = ((delta-Psparse).dot(X))
-    print("8 ")
+    print("8")
+    
+    
     #This is the memory killer and where Grad desc is using all memory
     L_delta = delta_P.multiply(learning_rate)
-    print("9 ")
+    print("9")
     W_sparse = W_sparse + L_delta-L_W
     print("iter one done ")
     #W = np.random.rand(unique_classes,columns)
@@ -125,6 +127,7 @@ def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
         #W = W + learning_rate*(np.matmul(delta-Ps,X)-lamb*W)
         W_sparse = W_sparse + learning_rate*(((delta-Psparse).dot(X))-lamb*W_sparse)
     print("Done w/ GD\n")
+    print(W_sparse.todense())
     return W_sparse
 
 
@@ -144,7 +147,7 @@ def classify(file, Y, W):
     W : list
         List of weights
     """
-
+    print("Y",Y)
     with open(file, newline='') as test_data:
         with open('solution.csv', 'w', newline='') as solution:
             data_reader = csv.reader(test_data)
@@ -193,10 +196,10 @@ if __name__ == "__main__":
     # results = to_sparse_mat("/home/jared/Downloads/training.csv")
     results = to_sparse_mat("test_train.csv")
 
-    W = grad_descent(results[0], results[1], results[3], results[2], .001, .001, 10)
+    W = grad_descent(results[0], results[1], results[3], results[2], .001, .001, 1000)
 
     #Converting Y and W formatting for classification
     Y = results[1].todense().tolist()[0]
     Y = [[y] for y in Y]
     W = W.todense().tolist()
-    classify("testing.csv", Y, W)
+    classify("test_tester.csv", Y, W)
