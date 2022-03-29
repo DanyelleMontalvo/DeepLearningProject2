@@ -80,7 +80,7 @@ def to_sparse_mat(file):
 def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
     print("Start GD")
     rows, columns = X.shape
-    X_t = X.T
+    X_t = X.transpose()
     W_sparse = sparse.rand(unique_classes,columns)
     print("1")
     Psparse = W_sparse.dot(X_t)
@@ -93,16 +93,12 @@ def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
     print("5")
     Psparse = normalize(Psparse,norm = 'l2')
     print("6")
-    L_W = lamb*W_sparse
+    L_W = W_sparse.multiply(lamb)
     print("7")
     delta_P = ((delta-Psparse).dot(X))
     print("8")
-    #This is the memory killer
-    #L_delta = learning_rate * delta_P.multiply()
-    
-    #I believe this is more optimized Have not tested
+    #This is the memory killer and where Grad desc is using all memory
     L_delta = delta_P.multiply(learning_rate)
-
     print("9")
     W_sparse = W_sparse + L_delta-L_W
     print("iter one done")
