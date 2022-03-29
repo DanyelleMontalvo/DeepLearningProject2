@@ -25,7 +25,7 @@ def to_sparse_mat(file):
     with open(file, newline='', encoding='utf-8-sig') as csvfile:
         csvreader = csv.reader(csvfile, delimiter=',')
         for row in csvreader:
-            if int(row[0]) >= 6000:
+            if int(row[0]) >= 1000:
                 break
             for idx, el in enumerate(row):
                 if int(el) == 0:
@@ -55,7 +55,6 @@ def to_sparse_mat(file):
     #rows, columns = numpy_array.shape
     ones = np.ones((rows,1))
     
-
     #X as described in Proj. 2 description
     numpy_array2 = numpy_array2[:,1:]
 
@@ -90,7 +89,7 @@ def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
     #W = np.random.rand(unique_classes,columns)
     
     Psparse = W_sparse.dot(X_t)
-    Psparse = np.exp(Psparse)
+    #Psparse = np.exp(Psparse)
     Psparse = Psparse.tolil()
     Psparse[-1, :] = 1
     Psparse = Psparse.tocsr()
