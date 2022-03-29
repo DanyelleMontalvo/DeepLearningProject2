@@ -85,15 +85,13 @@ def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
     rows, columns = X.shape
     X_t = X.transpose()
     W_sparse = sparse.rand(unique_classes,columns)
-<<<<<<< HEAD
-    print("1")
-=======
+
     print("1 ")
     
     #W = np.random.rand(unique_classes,columns)
     
->>>>>>> e177498cce05bc3309cf371b1fa9532509fb23ce
     Psparse = W_sparse.dot(X_t)
+    Psparse = np.exp(Psparse)
     print("2")
     Psparse = Psparse.tolil()
     print("3")
@@ -216,11 +214,7 @@ if __name__ == "__main__":
     #Converting Y and W formatting for classification
     Y = results[1].todense().tolist()[0]
     Y = [[y] for y in Y]
-<<<<<<< HEAD
-    W = W.todense().tolist()
-    classify("test_tester.csv", Y, W)
-=======
+
     #W = W.todense()
 
     classify("testing.csv", Y, W)
->>>>>>> e177498cce05bc3309cf371b1fa9532509fb23ce
