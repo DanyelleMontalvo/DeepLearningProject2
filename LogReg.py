@@ -25,7 +25,7 @@ def to_sparse_mat(file):
     with open(file, newline='', encoding='utf-8-sig') as csvfile:
         csvreader = csv.reader(csvfile, delimiter=',')
         for row in csvreader:
-            if int(row[0]) >= 1000:
+            if int(row[0]) >= 12000:
                 break
             for idx, el in enumerate(row):
                 if int(el) == 0:
@@ -145,6 +145,9 @@ def classify(file, Y, W, K):
 
     W : list
         List of weights
+
+    K : int
+        Number of unique classes
     """
     print("Y",Y)
     with open(file, newline='') as test_data:
@@ -191,7 +194,7 @@ def classify(file, Y, W, K):
                         probs.append(p)
 
                 idx = np.argmax(probs)
-                ans = [int(example[0]), idx]
+                ans = [int(example[0]), idx+1]
 
                 #Print answer pairs and write to csv
                 #print(ans)
