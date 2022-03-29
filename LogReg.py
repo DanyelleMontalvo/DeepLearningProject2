@@ -100,12 +100,10 @@ def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
     
     #This is the memory killer and where Grad desc is using all memory
     L_delta = delta_P.multiply(learning_rate)
-    print("9")
     W_sparse = W_sparse + L_delta-L_W
-    print("iter one done ")
 
     for i in range(1,iterations):
-        print("iter", i, "Size of W=", W_sparse.shape)
+        print("GD iter", i)
         # Ps = np.matmul(W,(X.T))
         # Ps = np.exp(Ps)
         Psparse = W_sparse.dot(X_t)
@@ -126,22 +124,18 @@ def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
         #W = W + learning_rate*(np.matmul(delta-Ps,X)-lamb*W)
         W_sparse = W_sparse + learning_rate*(((delta-Psparse).dot(X))-lamb*W_sparse)
     print("Done w/ GD\n")
-    print(W_sparse.todense())
     return W_sparse
 
 
-def classify(file, Y, W, K):
+def classify(file, W, K):
     """
     Classifies testing data using set of weights W. 
-    Uses equations 27 and 28 from Mitchell Ch.3.
+    Uses equations 27 and 28 from Mitchell Ch.3 but using sparse matrix multiplication.
 
     Parameters
     ----------
     file : str
         Filename of the test data
-
-    Y : list
-        List of unique classes
 
     W : list
         List of weights
@@ -149,7 +143,6 @@ def classify(file, Y, W, K):
     K : int
         Number of unique classes
     """
-    print("Y",Y)
     with open(file, newline='') as test_data:
         with open('solution.csv', 'w', newline='') as solution:
             data_reader = csv.reader(test_data)
@@ -205,10 +198,9 @@ if __name__ == "__main__":
     results = to_sparse_mat("training.csv")
 
     W = grad_descent(results[0], results[1], results[3], results[2], .001, .001, 1000)
-    print("W:", W.shape)
 
     #Converting Y formatting for classification
     Y = results[1].todense().tolist()[0]
     Y = [[y] for y in Y]
     K = results[3] - 1
-    classify("testing.csv", Y, W, K)
+    classify("testing.csv", W, K)
