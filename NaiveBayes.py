@@ -28,7 +28,6 @@ def csv_to_sparse(csvdoc, colnum):
             rowcount = rowcount + 1
     new_matrix = csr_matrix((data_count, (row_count, col_count)), shape=(rowcount, 61190))
     return new_matrix, rowcount
-
 def classify(csvdoc, p_v, probs_calc):
     """
     Function to classify an input
