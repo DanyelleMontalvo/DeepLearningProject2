@@ -25,6 +25,8 @@ def to_sparse_mat(file):
     with open(file, newline='', encoding='utf-8-sig') as csvfile:
         csvreader = csv.reader(csvfile, delimiter=',')
         for row in csvreader:
+            if int(row[0]) >= 100:
+                break
             for idx, el in enumerate(row):
                 if int(el) == 0:
                     continue
@@ -33,7 +35,8 @@ def to_sparse_mat(file):
                     col_count.append(idx)
                     data_count.append(int(el))
             rowcount = rowcount + 1
-    new_matrix = csr_matrix((data_count, (row_count, col_count)), shape=(rowcount, 16))
+
+    new_matrix = csr_matrix((data_count, (row_count, col_count)), shape=(rowcount, 61190))
     numpy_array = new_matrix.todense()
 
     #Build Y as described in Proj. 2 description
@@ -42,7 +45,7 @@ def to_sparse_mat(file):
     rows, columns = numpy_array.shape
     unique_classes = (np.unique(Y_np)).shape
     unique_classes = unique_classes[1]
-    delta=np.zeros((unique_classes,rows))
+    delta = np.zeros((unique_classes,rows))
     for r in numpy_array[:,-1]:
         for c in range(0,rows):
             if(r==numpy_array[c,-1]):
@@ -82,7 +85,14 @@ def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
     rows, columns = X.shape
     X_t = X.transpose()
     W_sparse = sparse.rand(unique_classes,columns)
+<<<<<<< HEAD
     print("1")
+=======
+    print("1 ")
+    
+    #W = np.random.rand(unique_classes,columns)
+    
+>>>>>>> e177498cce05bc3309cf371b1fa9532509fb23ce
     Psparse = W_sparse.dot(X_t)
     print("2")
     Psparse = Psparse.tolil()
@@ -104,9 +114,9 @@ def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
     print("9")
     W_sparse = W_sparse + L_delta-L_W
     print("iter one done ")
-    #W = np.random.rand(unique_classes,columns)
+
     for i in range(1,iterations):
-        print("iter", i)
+        print("iter", i, "Size of W=", W_sparse.shape)
         # Ps = np.matmul(W,(X.T))
         # Ps = np.exp(Ps)
         Psparse = W_sparse.dot(X_t)
@@ -162,25 +172,30 @@ def classify(file, Y, W):
 
                 X = example[1:]
                 X = [int(x) for x in X]
+                X = csr_matrix(X)
 
                 #List of P(Y=yk | X), max probability is the classifier
                 probs = []
                 K = len(Y) - 1
-                n = len(X) - 1
+                n = X.shape[0] - 1
+                W_0 = W[:,1:]
                 for k, y in enumerate(Y):
+                    #Sum from 1->n of w[k][i] * x[i]
+                    n_sum = sum(W_0.dot(X.transpose()))[0,0]
+                
                     #Separate equations for k == K and k != K
                     if k != K:
-                        num = np.exp(W[k][0] + sum(W[k][i] * X[i] for i in range(n)))
+                        num = np.exp(W[k, 0] + n_sum)
                         denom = 1
                         for j in range(K-1):
-                            denom += np.exp(W[j][0] + sum(W[j][i] * X[i] for i in range(n)))
+                            denom += np.exp(W[j, 0] + n_sum)
             
                         p = num / denom
                         probs.append(p)
                     else:
                         denom = 1
                         for j in range(K-1):
-                            denom += np.exp(W[j][0] + sum(W[j][i] * X[i] for i in range(n)))
+                            denom += np.exp(W[j, 0] + n_sum)
 
                         p = 1 / denom
                         probs.append(p)
@@ -194,12 +209,18 @@ def classify(file, Y, W):
 
 if __name__ == "__main__":
     # results = to_sparse_mat("/home/jared/Downloads/training.csv")
-    results = to_sparse_mat("test_train.csv")
+    results = to_sparse_mat("training.csv")
 
     W = grad_descent(results[0], results[1], results[3], results[2], .001, .001, 1000)
 
     #Converting Y and W formatting for classification
     Y = results[1].todense().tolist()[0]
     Y = [[y] for y in Y]
+<<<<<<< HEAD
     W = W.todense().tolist()
     classify("test_tester.csv", Y, W)
+=======
+    #W = W.todense()
+
+    classify("testing.csv", Y, W)
+>>>>>>> e177498cce05bc3309cf371b1fa9532509fb23ce
