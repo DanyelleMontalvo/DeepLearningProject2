@@ -28,8 +28,8 @@ def to_sparse_mat(file):
     with open(file, newline='', encoding='utf-8-sig') as csvfile:
         csvreader = csv.reader(csvfile, delimiter=',')
         for row in csvreader:
-            #if int(row[0]) >= 12000:
-            if int(row[0]) >= 10:
+            if int(row[0]) >= 12000:
+            #if int(row[0]) >= 10:
   
                 break
             for idx, el in enumerate(row):
@@ -41,7 +41,7 @@ def to_sparse_mat(file):
                     data_count.append(int(el))
             rowcount = rowcount + 1
 
-    new_matrix = csr_matrix((data_count, (row_count, col_count)), shape=(rowcount, 16))
+    new_matrix = csr_matrix((data_count, (row_count, col_count)), shape=(rowcount, 61190))
     numpy_array = new_matrix.todense()
 
     #Build Y as described in Proj. 2 description
@@ -113,8 +113,9 @@ def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
         
         Psparse = Psparse.tocsr()
         
-        Psparse = normalize(Psparse,norm = 'l2')
-        
+        Psparse = Psparse.toarray() 
+        Psparse = Psparse/Psparse.sum(axis=0,keepdims=1)
+        Psparse = csr_matrix(Psparse)
         L_W = W_sparse.multiply(lamb)
         delta_P = ((delta-Psparse).dot(X))
         L_delta = delta_P.multiply(learning_rate)
@@ -170,14 +171,14 @@ def classify(file, W, K):
                         num = (W[k, 0] + n_sum)
                         denom = 1
                         for j in range(K-1):
-                            denom += np.exp(W[j, 0] + n_sum)
+                            denom += (W[j, 0] + n_sum)
             
                         p = num / denom
                         probs.append(p)
                     else:
                         denom = 1
                         for j in range(K-1):
-                            denom += np.exp(W[j, 0] + n_sum)
+                            denom += (W[j, 0] + n_sum)
 
                         p = 1 / denom
                         probs.append(p)
@@ -190,14 +191,14 @@ def classify(file, W, K):
                 solout.writerow(ans)
 
 if __name__ == "__main__":
-    #results = to_sparse_mat("/home/jared/Downloads/training.csv")
-    results = to_sparse_mat("test_train.csv")
+    results = to_sparse_mat("/home/jared/Downloads/training.csv")
+    #results = to_sparse_mat("test_train.csv")
 
-    W = grad_descent(results[0], results[1], results[3], results[2], .01, .01, 8)
+    W = grad_descent(results[0], results[1], results[3], results[2], .01, .01, 100)
 
     #Converting Y formatting for classification
     Y = results[1].todense().tolist()[0]
     Y = [[y] for y in Y]
     K = results[3] - 1
-    #classify("/home/jared/Downloads/testing.csv", W, K)
-    classify("test_tester.csv", W, K)
+    classify("/home/jared/Downloads/testing.csv", W, K)
+    #classify("test_tester.csv", W, K)
