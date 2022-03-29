@@ -82,26 +82,26 @@ def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
     rows, columns = X.shape
     X_t = X.transpose()
     W_sparse = sparse.rand(unique_classes,columns)
-    print("1")
+    print("1 ")
     Psparse = W_sparse.dot(X_t)
-    print("2")
+    print("2 ")
     Psparse = Psparse.tolil()
-    print("3")
+    print("3 ")
     Psparse[-1, :] = 1
-    print("4")
+    print("4 ")
     Psparse = Psparse.tocsr()
-    print("5")
+    print("5 ")
     Psparse = normalize(Psparse,norm = 'l2')
-    print("6")
+    print("6 ")
     L_W = W_sparse.multiply(lamb)
-    print("7")
+    print("7 ")
     delta_P = ((delta-Psparse).dot(X))
-    print("8")
+    print("8 ")
     #This is the memory killer and where Grad desc is using all memory
     L_delta = delta_P.multiply(learning_rate)
-    print("9")
+    print("9 ")
     W_sparse = W_sparse + L_delta-L_W
-    print("iter one done")
+    print("iter one done ")
     #W = np.random.rand(unique_classes,columns)
     for i in range(1,iterations):
         print("iter", i)
@@ -190,7 +190,9 @@ def classify(file, Y, W):
                 solout.writerow(ans)
 
 if __name__ == "__main__":
-    results = to_sparse_mat("/home/jared/Downloads/training.csv")
+    # results = to_sparse_mat("/home/jared/Downloads/training.csv")
+    results = to_sparse_mat("test_train.csv")
+
     W = grad_descent(results[0], results[1], results[3], results[2], .001, .001, 10)
 
     #Converting Y and W formatting for classification
