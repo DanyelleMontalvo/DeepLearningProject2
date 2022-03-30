@@ -86,8 +86,7 @@ def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
     print("Start GD")
     rows, columns = X.shape
     X_t = X.transpose()
-    W_sparse = sparse.rand(unique_classes,columns)
-
+    W_sparse = sparse.rand(unique_classes,columns)   
     
     Psparse = W_sparse.dot(X_t)
     Psparse = Psparse.todense()
@@ -96,11 +95,16 @@ def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
     Psparse = lil_matrix(Psparse)
     Psparse[-1, :] = 1
     Psparse = Psparse.tocsr()
-    Psparse = normalize(Psparse,norm = 'l2')
+    
+    Psparse = Psparse.toarray() 
+    Psparse = Psparse/Psparse.sum(axis=0,keepdims=1)
+    Psparse = csr_matrix(Psparse)
+    
     L_W = W_sparse.multiply(lamb)
     delta_P = ((delta-Psparse).dot(X))
-    L_delta = delta_P.multiply(learning_rate)
-    W_new = W_sparse + L_delta-L_W  
+    L_delta = delta_P
+    W_new = W_sparse + (L_delta.multiply(learning_rate)-L_W.multiply(learning_rate))  
+    
     for i in range(1,iterations):
         W_sparse =W_new
         print("GD iter", i)
@@ -111,17 +115,17 @@ def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
     
         Psparse = lil_matrix(Psparse)
         Psparse[-1, :] = 1
-        
         Psparse = Psparse.tocsr()
         
         Psparse = Psparse.toarray() 
         Psparse = Psparse/Psparse.sum(axis=0,keepdims=1)
         Psparse = csr_matrix(Psparse)
+        
         L_W = W_sparse.multiply(lamb)
         delta_P = ((delta-Psparse).dot(X))
-        L_delta = delta_P.multiply(learning_rate)
-        W_new = W_sparse + L_delta-L_W   
-    print(Psparse.todense())
+        L_delta = delta_P
+        W_new = W_sparse + (L_delta.multiply(learning_rate)-L_W.multiply(learning_rate))   
+    print("PROBS\n",Psparse.todense(),"\n","WEIGHTS\n", W_new.todense())
     return W_new
 
 
@@ -166,7 +170,7 @@ def classify(file, W, K):
                     n_sum = sum_mat[k, 0]
 
                     #Separate equations for k == K and k != K
-                    if k != K:
+                    if True:
                         num = (W[k, 0] + n_sum)
                         denom = 1
                         for j in range(K-1):
