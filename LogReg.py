@@ -28,7 +28,7 @@ def to_sparse_mat(file):
     with open(file, newline='', encoding='utf-8-sig') as csvfile:
         csvreader = csv.reader(csvfile, delimiter=',')
         for row in csvreader:
-            if int(row[0]) >= 1000:
+            if int(row[0]) >= 12000:
             #if int(row[0]) >= 10:
   
                 break
@@ -47,7 +47,7 @@ def to_sparse_mat(file):
 
     #Build Y as described in Proj. 2 description
     Y_np = numpy_array[:,-1]
-    numpy_array2 = numpy_array[:,:-1]
+    numpy_array = numpy_array[:,:-1]
     rows, columns = numpy_array.shape
 
     unique_classes = len(np.unique([y[0] for y in Y_np.tolist()]))
@@ -65,9 +65,9 @@ def to_sparse_mat(file):
     ones = np.ones((rows,1))
     
     #X as described in Proj. 2 description
-    numpy_array2 = numpy_array2[:,1:]
+    numpy_array = numpy_array[:,1:]
 
-    final_array = np.append(ones,numpy_array2,1)
+    final_array = np.append(ones,numpy_array,1)
     #Normalized array
     #k as described in Proj. 2 description
     #init delta as described in Proj. 2 description (k x m matrix of zeros)
@@ -123,7 +123,7 @@ def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
         Psparse = np.exp(Psparse.data)
         Psparse[-1, :] = 1
         Psparse = normalize(Psparse, norm='l1', axis=0)
-        print(Psparse)
+        #print(Psparse)
 
         Psparse = lil_matrix(Psparse)
         Psparse = Psparse.tocsr()
@@ -133,8 +133,8 @@ def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
         W_sparse = W_sparse + L_delta - L_W
 
     print("Done w/ GD\n")
-    print(W_sparse.todense())
-    print(Psparse.todense())
+    #print(W_sparse.todense())
+    #print(Psparse.todense())
     return W_sparse
 
 
@@ -187,9 +187,7 @@ if __name__ == "__main__":
     results = to_sparse_mat("training.csv")
     #results = to_sparse_mat("smalltrain.csv")
 
-    W = grad_descent(results[0], results[1], results[3], results[2], .01, .01, 100)
-    #print('************************************')
-    #print("-----------------\n",W.todense()[:,1])
+    W = grad_descent(results[0], results[1], results[3], results[2], .001, .001, 10000)
 
     W = W[:,1:]
     K = results[3] - 1
