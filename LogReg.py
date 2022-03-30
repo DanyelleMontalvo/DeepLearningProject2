@@ -81,47 +81,49 @@ def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
     print("Start GD")
     rows, columns = X.shape
     X_t = X.transpose()
-    W_sparse = sparse.rand(unique_classes,columns)   
+    W_sparse = sparse.rand(unique_classes,columns)
+    #W = np.random.rand(unique_classes,columns)
     
     Psparse = W_sparse.dot(X_t)
-    Psparse = Psparse.todense()
-    Psparse = np.exp(Psparse.data)
-    
-    Psparse = lil_matrix(Psparse)
+    #Psparse = np.exp(Psparse)
+    Psparse = Psparse.tolil()
     Psparse[-1, :] = 1
     Psparse = Psparse.tocsr()
-    
-    Psparse = Psparse.toarray() 
-    Psparse = Psparse/Psparse.sum(axis=0,keepdims=1)
-    Psparse = csr_matrix(Psparse)
-    
+    Psparse = normalize(Psparse,norm = 'l2')
     L_W = W_sparse.multiply(lamb)
     delta_P = ((delta-Psparse).dot(X))
-    L_delta = delta_P
-    W_new = W_sparse + (L_delta.multiply(learning_rate)-L_W.multiply(learning_rate))  
     
+
+    #This is the memory killer and where Grad desc is using all memory
+    L_delta = delta_P.multiply(learning_rate)
+    print("9")
+    W_sparse = W_sparse + L_delta-L_W
+    print("iter one done ")
+
     for i in range(1,iterations):
-        W_sparse =W_new
+        print("iter", i, "Size of W=", W_sparse.shape)
         print("GD iter", i)
-        
+        # Ps = np.matmul(W,(X.T))
+        # Ps = np.exp(Ps)
         Psparse = W_sparse.dot(X_t)
-        Psparse = Psparse.todense()
-        Psparse = np.exp(Psparse.data)
-    
-        Psparse = lil_matrix(Psparse)
-        Psparse[-1, :] = 1
-        Psparse = Psparse.tocsr()
-        
-        Psparse = Psparse.toarray() 
-        Psparse = Psparse/Psparse.sum(axis=0,keepdims=1)
-        Psparse = csr_matrix(Psparse)
-        
-        L_W = W_sparse.multiply(lamb)
-        delta_P = ((delta-Psparse).dot(X))
-        L_delta = delta_P
-        W_new = W_sparse + (L_delta.multiply(learning_rate)-L_W.multiply(learning_rate))   
-    print("PROBS\n",Psparse.todense(),"\n","WEIGHTS\n", W_new.todense())
-    return W_new
+        #Set bottom row to 1's and normalize each column
+        #Psparse = Psparse.tolil()
+        #Psparse[-1, :] = 1
+        #Psparse = Psparse.tocsr()
+       # Ps[len(Ps)-1] = np.ones_like(Ps[0])
+        #Sparse normalize
+        Psparse = normalize(Psparse,norm = 'l2')
+        # for col in range(len(Ps[0])):
+        #     sum = 0
+        #     for i in range(len(Ps)):
+        #         sum += Ps[i][col]
+        #     for i in range(len(Ps)):
+        #         Ps[i][col] /= sum
+        #W = W + learning_rate*(np.matmul(delta-Ps,X)-lamb*W)
+        W_sparse = W_sparse + learning_rate*(((delta-Psparse).dot(X))-lamb*W_sparse)
+    print("Done w/ GD\n")
+    print(W_sparse.todense())
+    return W_sparse
 
 
 def classify(file, W, K):
@@ -156,9 +158,7 @@ def classify(file, W, K):
                 sum_mat = W.dot(X.transpose()).todense()
                 sum_mat = np.exp(sum_mat)
 
-<<<<<<< HEAD
                 idx = np.argmax(sum_mat)
-=======
                 #List of P(Y=yk | X), max probability is the classifier
                 probs = []
                 for k in range(K+1):
@@ -182,7 +182,6 @@ def classify(file, W, K):
                         probs.append(p)
 
                 idx = np.argmax(probs)
->>>>>>> 8682f9a21fb4ee50a630d83db6c1e9d19c8a4537
                 ans = [int(example[0]), idx+1]
 
                 #Print answer pairs and write to csv
@@ -190,11 +189,11 @@ def classify(file, W, K):
                 solout.writerow(ans)
 
 if __name__ == "__main__":
-    #results = to_sparse_mat("/home/jared/Downloads/training.csv")
-    results = to_sparse_mat("training.csv")
+    results = to_sparse_mat("/home/jared/Downloads/training.csv")
+    #results = to_sparse_mat("training.csv")
 
     W = grad_descent(results[0], results[1], results[3], results[2], .01, .01, 100)
     K = results[3] - 1
 
-    #classify("/home/jared/Downloads/testing.csv", W, K)
-    classify("testing.csv", W[:,1:], K)
+    classify("/home/jared/Downloads/testing.csv", W, K)
+    #classify("testing.csv", W[:,1:], K)
