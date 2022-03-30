@@ -28,8 +28,8 @@ def to_sparse_mat(file):
     with open(file, newline='', encoding='utf-8-sig') as csvfile:
         csvreader = csv.reader(csvfile, delimiter=',')
         for row in csvreader:
-            if int(row[0]) >= 12000:
-            #if int(row[0]) >= 10:
+            #if int(row[0]) >= 12000:
+            if int(row[0]) >= 10:
   
                 break
             for idx, el in enumerate(row):
@@ -41,7 +41,7 @@ def to_sparse_mat(file):
                     data_count.append(int(el))
             rowcount = rowcount + 1
 
-    new_matrix = csr_matrix((data_count, (row_count, col_count)), shape=(rowcount, 61190))
+    new_matrix = csr_matrix((data_count, (row_count, col_count)), shape=(rowcount, 16))
     numpy_array = new_matrix.todense()
 
     #Build Y as described in Proj. 2 description
@@ -100,8 +100,9 @@ def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
     L_W = W_sparse.multiply(lamb)
     delta_P = ((delta-Psparse).dot(X))
     L_delta = delta_P.multiply(learning_rate)
-    W_sparse = W_sparse + L_delta-L_W  
+    W_new = W_sparse + L_delta-L_W  
     for i in range(1,iterations):
+        W_sparse =W_new
         print("GD iter", i)
         
         Psparse = W_sparse.dot(X_t)
@@ -119,11 +120,9 @@ def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
         L_W = W_sparse.multiply(lamb)
         delta_P = ((delta-Psparse).dot(X))
         L_delta = delta_P.multiply(learning_rate)
-        W_sparse = W_sparse + L_delta-L_W   
-        print("Done w/ GD\n")
-    print(W_sparse.todense())
+        W_new = W_sparse + L_delta-L_W   
     print(Psparse.todense())
-    return W_sparse
+    return W_new
 
 
 
@@ -191,8 +190,8 @@ def classify(file, W, K):
                 solout.writerow(ans)
 
 if __name__ == "__main__":
-    results = to_sparse_mat("/home/jared/Downloads/training.csv")
-    #results = to_sparse_mat("test_train.csv")
+    #results = to_sparse_mat("/home/jared/Downloads/training.csv")
+    results = to_sparse_mat("test_train.csv")
 
     W = grad_descent(results[0], results[1], results[3], results[2], .01, .01, 100)
 
@@ -200,5 +199,5 @@ if __name__ == "__main__":
     Y = results[1].todense().tolist()[0]
     Y = [[y] for y in Y]
     K = results[3] - 1
-    classify("/home/jared/Downloads/testing.csv", W, K)
-    #classify("test_tester.csv", W, K)
+    #classify("/home/jared/Downloads/testing.csv", W, K)
+    classify("test_tester.csv", W, K)
