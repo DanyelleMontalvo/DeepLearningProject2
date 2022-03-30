@@ -28,7 +28,7 @@ def to_sparse_mat(file):
     with open(file, newline='', encoding='utf-8-sig') as csvfile:
         csvreader = csv.reader(csvfile, delimiter=',')
         for row in csvreader:
-            if int(row[0]) >= 12000:
+            if int(row[0]) >= 1000:
             #if int(row[0]) >= 10:
   
                 break
@@ -131,7 +131,8 @@ def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
         delta_P = ((delta - Psparse).dot(X))
         L_delta = delta_P.multiply(learning_rate)
         W_sparse = W_sparse + L_delta - L_W
-        print("Done w/ GD\n")
+
+    print("Done w/ GD\n")
     print(W_sparse.todense())
     print(Psparse.todense())
     return W_sparse
@@ -146,8 +147,8 @@ def classify(file, W, K):
     ----------
     file : str
         Filename of the test data
-    W : list
-        List of weights
+    W : csr_matrix
+        Matrix of weights
     K : int
         Number of unique classes
     """
@@ -169,36 +170,14 @@ def classify(file, W, K):
                 X = [int(x) for x in X]
                 X = csr_matrix(X)
 
-                print(X)
+                #print(X)
 
                 #Column of k sums from 1->n of W[k][i] * X[i]
-                sum_mat = W_1.dot(X.transpose())
-
-                #List of P(Y=yk | X), max probability is the classifier
-                probs = []
-                for k in range(K+1):
-                    n_sum = sum_mat[k, 0]
-
-                    #Separate equations for k == K and k != K
-                    #if k != K:
-                    if True:
-                        num = (W[k, 0] + n_sum)
-                        denom = 1
-                        for j in range(K-1):
-                            denom += (W[j, 0] + n_sum)
-
-                        p = num / denom
-                        probs.append(p)
-                    else:
-                        denom = 1
-                        for j in range(K-1):
-                            denom += (W[j, 0] + n_sum)
-
-                        p = 1 / denom
-                        probs.append(p)
-                print(probs)
-                idx = np.argmax(probs)
-                ans = [int(example[0]), idx+1]
+                sum_mat = W_1.dot(X.transpose()).todense()
+                sum_mat = np.exp(sum_mat)
+                
+                c = np.argmax(sum_mat) + 1
+                ans = [int(example[0]), c]
 
                 #Print answer pairs and write to csv
                 print(ans)
@@ -210,11 +189,9 @@ if __name__ == "__main__":
 
     W = grad_descent(results[0], results[1], results[3], results[2], .01, .01, 100)
     #print('************************************')
-    #print(W)
+    #print("-----------------\n",W.todense()[:,1])
 
-    #Converting Y formatting for classification
-    Y = results[1].todense().tolist()[0]
-    Y = [[y] for y in Y]
+    W = W[:,1:]
     K = results[3] - 1
-    classify("testing 3.csv", W, K)
+    classify("testing.csv", W, K)
     #classify("smalltest.csv", W, K)
