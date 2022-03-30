@@ -195,6 +195,7 @@ def classify(file, W, K):
 
                 X = example[1:]
                 X = [int(x) for x in X]
+                X.append(1)
                 X = csr_matrix(X)
 
                 sum_mat = W_1.dot(X.transpose()).todense()
@@ -211,9 +212,9 @@ if __name__ == "__main__":
     results = to_sparse_mat("training.csv")
     #results = to_sparse_mat("smalltrain.csv")
 
-    W = grad_descent(results[0], results[1], results[3], results[2], .01, .01, limit=0.001)
+    W = grad_descent(results[0], results[1], results[3], results[2], .001, .001, iterations=1000)
 
-    W = W[:,1:]
+    #W = W[:,1:]
     K = results[3] - 1
     classify("testing.csv", W, K)
     #classify("smalltest.csv", W, K)
