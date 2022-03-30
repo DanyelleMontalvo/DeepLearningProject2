@@ -29,9 +29,7 @@ def to_sparse_mat(file):
         csvreader = csv.reader(csvfile, delimiter=',')
         for row in csvreader:
             if int(row[0]) >= 12000:
-            # if int(row[0]) >= 10:
                 break
-
             for idx, el in enumerate(row):
                 if int(el) == 0:
                     continue
@@ -48,9 +46,9 @@ def to_sparse_mat(file):
     Y_np = numpy_array[:,-1]
     numpy_array2 = numpy_array[:,:-1]
     rows, columns = numpy_array.shape
-
-    unique_classes = len(np.unique([y[0] for y in Y_np.tolist()]))
-
+    unique_classes = (np.unique(Y_np)).shape
+    unique_classes = unique_classes[1]
+    delta=np.zeros((unique_classes,rows))
     delta = np.zeros((unique_classes,rows))
     for r in numpy_array[:,-1]:
         for c in range(0,rows):
@@ -62,7 +60,6 @@ def to_sparse_mat(file):
     
     #X as described in Proj. 2 description
     numpy_array2 = numpy_array2[:,1:]
-
     final_array = np.append(ones,numpy_array2,1)
     #Normalized array
     #k as described in Proj. 2 description
@@ -78,8 +75,6 @@ def to_sparse_mat(file):
     # Y = (Y_np.T)
     print("Done w/ conv\n")
     return X_sparse, Y_sparse, delta_sparse, unique_classes
-    #return X, Y, delta_sparse
-    
 
 #As written (the non-commented bits) assumes sparse matrix inputs
 def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
@@ -123,15 +118,9 @@ def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
         
         L_W = W_sparse.multiply(lamb)
         delta_P = ((delta-Psparse).dot(X))
-<<<<<<< HEAD
-        L_delta = delta_P.multiply(learning_rate)
-        W_new = W_sparse + L_delta-L_W   
-    #print(Psparse.todense())
-=======
         L_delta = delta_P
         W_new = W_sparse + (L_delta.multiply(learning_rate)-L_W.multiply(learning_rate))   
     print("PROBS\n",Psparse.todense(),"\n","WEIGHTS\n", W_new.todense())
->>>>>>> 8682f9a21fb4ee50a630d83db6c1e9d19c8a4537
     return W_new
 
 
