@@ -42,6 +42,7 @@ def to_sparse_mat(file):
             rowcount = rowcount + 1
 
     new_matrix = csr_matrix((data_count, (row_count, col_count)), shape=(rowcount, 61190))
+    #new_matrix = csr_matrix((data_count, (row_count, col_count)), shape=(rowcount, 5))
     numpy_array = new_matrix.todense()
 
     #Build Y as described in Proj. 2 description
@@ -52,10 +53,13 @@ def to_sparse_mat(file):
     unique_classes = len(np.unique([y[0] for y in Y_np.tolist()]))
 
     delta = np.zeros((unique_classes,rows))
-    for r in numpy_array[:,-1]:
-        for c in range(0,rows):
-            if(r==numpy_array[c,-1]):
-                delta[r-1,c] =1
+    #for r in numpy_array[:,-1]:
+    #    for c in range(0,rows):
+    #        if(r==numpy_array[c,-1]):
+    #            delta[r-1,c] =1
+    for c in range(0, rows):
+        delta[Y_np[c]-1,c] = 1
+
     #numpy_array2 = numpy_array[:,:-1]
     #rows, columns = numpy_array.shape
     ones = np.ones((rows,1))
@@ -84,42 +88,49 @@ def to_sparse_mat(file):
 #As written (the non-commented bits) assumes sparse matrix inputs
 def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
     print("Start GD")
+    X = X.toarray()
     rows, columns = X.shape
+    ones_row = np.ones((rows, 1))
+    print(X)
+    print(ones_row)
+    X = np.append(X, ones_row, axis=1)
+    X = normalize(X, norm='l1', axis=0)
     X_t = X.transpose()
-    W_sparse = sparse.rand(unique_classes,columns)
+    W_sparse = sparse.rand(unique_classes,columns+1)
+    X_t = csr_matrix(X_t)
+    X = csr_matrix(X)
 
-    
+
     Psparse = W_sparse.dot(X_t)
     Psparse = Psparse.todense()
     Psparse = np.exp(Psparse.data)
-    
-    Psparse = lil_matrix(Psparse)
     Psparse[-1, :] = 1
+    Psparse = normalize(Psparse, norm='l1', axis=0)
+    print(Psparse)
+
+    Psparse = lil_matrix(Psparse)
     Psparse = Psparse.tocsr()
-    Psparse = normalize(Psparse,norm = 'l2')
-    L_W = W_sparse.multiply(lamb)
+    L_W = W_sparse.multiply(lamb * learning_rate)
     delta_P = ((delta-Psparse).dot(X))
     L_delta = delta_P.multiply(learning_rate)
-    W_sparse = W_sparse + L_delta-L_W  
+    W_sparse = W_sparse + L_delta-L_W
+
     for i in range(1,iterations):
         print("GD iter", i)
-        
+
         Psparse = W_sparse.dot(X_t)
         Psparse = Psparse.todense()
         Psparse = np.exp(Psparse.data)
-    
-        Psparse = lil_matrix(Psparse)
         Psparse[-1, :] = 1
-        
+        Psparse = normalize(Psparse, norm='l1', axis=0)
+        print(Psparse)
+
+        Psparse = lil_matrix(Psparse)
         Psparse = Psparse.tocsr()
-        
-        Psparse = Psparse.toarray() 
-        Psparse = Psparse/Psparse.sum(axis=0,keepdims=1)
-        Psparse = csr_matrix(Psparse)
-        L_W = W_sparse.multiply(lamb)
-        delta_P = ((delta-Psparse).dot(X))
+        L_W = W_sparse.multiply(lamb * learning_rate)
+        delta_P = ((delta - Psparse).dot(X))
         L_delta = delta_P.multiply(learning_rate)
-        W_sparse = W_sparse + L_delta-L_W   
+        W_sparse = W_sparse + L_delta - L_W
         print("Done w/ GD\n")
     print(W_sparse.todense())
     print(Psparse.todense())
@@ -158,6 +169,8 @@ def classify(file, W, K):
                 X = [int(x) for x in X]
                 X = csr_matrix(X)
 
+                print(X)
+
                 #Column of k sums from 1->n of W[k][i] * X[i]
                 sum_mat = W_1.dot(X.transpose())
 
@@ -167,12 +180,13 @@ def classify(file, W, K):
                     n_sum = sum_mat[k, 0]
 
                     #Separate equations for k == K and k != K
-                    if k != K:
+                    #if k != K:
+                    if True:
                         num = (W[k, 0] + n_sum)
                         denom = 1
                         for j in range(K-1):
                             denom += (W[j, 0] + n_sum)
-            
+
                         p = num / denom
                         probs.append(p)
                     else:
@@ -182,23 +196,25 @@ def classify(file, W, K):
 
                         p = 1 / denom
                         probs.append(p)
-
+                print(probs)
                 idx = np.argmax(probs)
                 ans = [int(example[0]), idx+1]
 
                 #Print answer pairs and write to csv
-                #print(ans)
+                print(ans)
                 solout.writerow(ans)
 
 if __name__ == "__main__":
-    results = to_sparse_mat("/home/jared/Downloads/training.csv")
-    #results = to_sparse_mat("test_train.csv")
+    results = to_sparse_mat("training.csv")
+    #results = to_sparse_mat("smalltrain.csv")
 
     W = grad_descent(results[0], results[1], results[3], results[2], .01, .01, 100)
+    #print('************************************')
+    #print(W)
 
     #Converting Y formatting for classification
     Y = results[1].todense().tolist()[0]
     Y = [[y] for y in Y]
     K = results[3] - 1
-    classify("/home/jared/Downloads/testing.csv", W, K)
-    #classify("test_tester.csv", W, K)
+    classify("testing 3.csv", W, K)
+    #classify("smalltest.csv", W, K)
