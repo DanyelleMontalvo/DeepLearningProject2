@@ -82,11 +82,10 @@ def to_sparse_mat(file):
     # Y = (Y_np.T)
     print("Done w/ conv\n")
     return X_sparse, Y_sparse, delta_sparse, unique_classes
-    #return X, Y, delta_sparse
     
 
 #As written (the non-commented bits) assumes sparse matrix inputs
-def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
+def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations=None, limit=None):
     print("Start GD")
     X = X.toarray()
     rows, columns = X.shape
@@ -115,28 +114,56 @@ def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
     L_delta = delta_P.multiply(learning_rate)
     W_sparse = W_sparse + L_delta-L_W
 
-    for i in range(1,iterations):
-        print("GD iter", i)
+    if iterations:
+        for i in range(1,iterations):
+            print("GD iter", i)
 
-        Psparse = W_sparse.dot(X_t)
-        Psparse = Psparse.todense()
-        Psparse = np.exp(Psparse.data)
-        Psparse[-1, :] = 1
-        Psparse = normalize(Psparse, norm='l1', axis=0)
-        #print(Psparse)
+            Psparse = W_sparse.dot(X_t)
+            Psparse = Psparse.todense()
+            Psparse = np.exp(Psparse.data)
+            Psparse[-1, :] = 1
+            Psparse = normalize(Psparse, norm='l1', axis=0)
+            #print(Psparse)
 
-        Psparse = lil_matrix(Psparse)
-        Psparse = Psparse.tocsr()
-        L_W = W_sparse.multiply(lamb * learning_rate)
-        delta_P = ((delta - Psparse).dot(X))
-        L_delta = delta_P.multiply(learning_rate)
-        W_sparse = W_sparse + L_delta - L_W
+            Psparse = lil_matrix(Psparse)
+            Psparse = Psparse.tocsr()
+            L_W = W_sparse.multiply(lamb * learning_rate)
+            delta_P = ((delta - Psparse).dot(X))
+            L_delta = delta_P.multiply(learning_rate)
+            W_sparse = W_sparse + L_delta - L_W
+
+    elif limit:
+        count = 1
+        while True:
+            Psparse = W_sparse.dot(X_t)
+            Psparse = Psparse.todense()
+            Psparse = np.exp(Psparse.data)
+            Psparse[-1, :] = 1
+            Psparse = normalize(Psparse, norm='l1', axis=0)
+            #print(Psparse)
+
+            Psparse = lil_matrix(Psparse)
+            Psparse = Psparse.tocsr()
+            L_W = W_sparse.multiply(lamb * learning_rate)
+            delta_P = ((delta - Psparse).dot(X))
+            L_delta = delta_P.multiply(learning_rate)
+
+            W_next = W_sparse + L_delta - L_W
+            diff = np.abs(csr_matrix.max(W_next) - csr_matrix.max(W_sparse))
+            W_sparse = W_next
+
+            print("GD iter", count, "- Diff =", diff)
+            count += 1
+
+            if diff <= limit:
+                break
+
+            
 
     print("Done w/ GD\n")
     #print(W_sparse.todense())
     #print(Psparse.todense())
     return W_sparse
-
 
 
 def classify(file, W, K):
@@ -170,9 +197,6 @@ def classify(file, W, K):
                 X = [int(x) for x in X]
                 X = csr_matrix(X)
 
-                #print(X)
-
-                #Column of k sums from 1->n of W[k][i] * X[i]
                 sum_mat = W_1.dot(X.transpose()).todense()
                 sum_mat = np.exp(sum_mat)
                 
@@ -187,7 +211,7 @@ if __name__ == "__main__":
     results = to_sparse_mat("training.csv")
     #results = to_sparse_mat("smalltrain.csv")
 
-    W = grad_descent(results[0], results[1], results[3], results[2], .001, .001, 10000)
+    W = grad_descent(results[0], results[1], results[3], results[2], .01, .01, limit=0.001)
 
     W = W[:,1:]
     K = results[3] - 1
