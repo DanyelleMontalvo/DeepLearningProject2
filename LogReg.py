@@ -28,10 +28,10 @@ def to_sparse_mat(file):
     with open(file, newline='', encoding='utf-8-sig') as csvfile:
         csvreader = csv.reader(csvfile, delimiter=',')
         for row in csvreader:
-            #if int(row[0]) >= 12000:
-            if int(row[0]) >= 10:
-  
+            if int(row[0]) >= 12000:
+            # if int(row[0]) >= 10:
                 break
+
             for idx, el in enumerate(row):
                 if int(el) == 0:
                     continue
@@ -41,7 +41,7 @@ def to_sparse_mat(file):
                     data_count.append(int(el))
             rowcount = rowcount + 1
 
-    new_matrix = csr_matrix((data_count, (row_count, col_count)), shape=(rowcount, 16))
+    new_matrix = csr_matrix((data_count, (row_count, col_count)), shape=(rowcount, 61190))
     numpy_array = new_matrix.todense()
 
     #Build Y as described in Proj. 2 description
@@ -121,9 +121,8 @@ def grad_descent(X, Y, unique_classes, delta, lamb, learning_rate, iterations):
         delta_P = ((delta-Psparse).dot(X))
         L_delta = delta_P.multiply(learning_rate)
         W_new = W_sparse + L_delta-L_W   
-    print(Psparse.todense())
+    #print(Psparse.todense())
     return W_new
-
 
 
 def classify(file, W, K):
@@ -144,9 +143,6 @@ def classify(file, W, K):
             data_reader = csv.reader(test_data)
             solout = csv.writer(solution)
             solout.writerow(['id', 'class'])
-
-            n = W.shape[1] - 1
-            W_1 = W[:,1:]
             
             count = 1
             for example in data_reader:
@@ -157,32 +153,11 @@ def classify(file, W, K):
                 X = [int(x) for x in X]
                 X = csr_matrix(X)
 
-                #Column of k sums from 1->n of W[k][i] * X[i]
-                sum_mat = W_1.dot(X.transpose())
+                #P(Y|W, X) ~ exp(W.XT)
+                sum_mat = W.dot(X.transpose()).todense()
+                sum_mat = np.exp(sum_mat)
 
-                #List of P(Y=yk | X), max probability is the classifier
-                probs = []
-                for k in range(K+1):
-                    n_sum = sum_mat[k, 0]
-
-                    #Separate equations for k == K and k != K
-                    if k != K:
-                        num = (W[k, 0] + n_sum)
-                        denom = 1
-                        for j in range(K-1):
-                            denom += (W[j, 0] + n_sum)
-            
-                        p = num / denom
-                        probs.append(p)
-                    else:
-                        denom = 1
-                        for j in range(K-1):
-                            denom += (W[j, 0] + n_sum)
-
-                        p = 1 / denom
-                        probs.append(p)
-
-                idx = np.argmax(probs)
+                idx = np.argmax(sum_mat)
                 ans = [int(example[0]), idx+1]
 
                 #Print answer pairs and write to csv
@@ -191,13 +166,10 @@ def classify(file, W, K):
 
 if __name__ == "__main__":
     #results = to_sparse_mat("/home/jared/Downloads/training.csv")
-    results = to_sparse_mat("test_train.csv")
+    results = to_sparse_mat("training.csv")
 
     W = grad_descent(results[0], results[1], results[3], results[2], .01, .01, 100)
-
-    #Converting Y formatting for classification
-    Y = results[1].todense().tolist()[0]
-    Y = [[y] for y in Y]
     K = results[3] - 1
+
     #classify("/home/jared/Downloads/testing.csv", W, K)
-    classify("test_tester.csv", W, K)
+    classify("testing.csv", W[:,1:], K)
