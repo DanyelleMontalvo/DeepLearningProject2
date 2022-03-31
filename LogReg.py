@@ -325,11 +325,11 @@ if __name__ == "__main__":
     
     #results = to_sparse_mat("smalltrain.csv")
     text_matrix = to_sparse_mat_for_conf('/home/jared/Downloads/training.csv',0, 6000)
-    #class_matrix = to_sparse_mat_for_conf('/home/jared/Downloads/training.csv',6001, 12000)
-    cols = text_matrix[4]
+    class_matrix = to_sparse_mat_for_conf('/home/jared/Downloads/training.csv',6001, 12000)
+    cols = class_matrix[4]
     for i in cols:
         cols_comp.append(i.item())
-    new_class_matrix = text_matrix[0]
+    new_class_matrix = class_matrix[0]
 
     #W = grad_descent(results[0], results[1], results[3], results[2], .001, .001, iterations=1000)
     
@@ -343,8 +343,10 @@ if __name__ == "__main__":
     actual = cols_comp
     predicted = spec_array
     disp_label = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-    matrix = confusion_matrix(actual,predicted, labels=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,18, 19, 20],normalize='true')
+    matrix = confusion_matrix(actual,predicted, labels=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,18, 19, 20])
+
     print(matrix)
+    
     disp = ConfusionMatrixDisplay(confusion_matrix= matrix, display_labels=disp_label)
     disp.plot()
     plt.show()

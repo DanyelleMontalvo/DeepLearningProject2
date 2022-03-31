@@ -2,7 +2,7 @@ from scipy.stats import entropy
 import array as arr
 import numpy as np
 
-def my_func(array_O_words,words_txt, probs_calc,MAPS):
+def my_func(array_O_words,words_txt,MAPS):
     """
     
 
@@ -12,8 +12,6 @@ def my_func(array_O_words,words_txt, probs_calc,MAPS):
         Array representing the original data set including the true classes.
     words_txt : path to vocabulary.txt file
         .txt file holding ordered set of vocabulary.
-    probs_calc : TYPE
-        DESCRIPTION.
     MAPS : List
         List of calculated MAP approximations of P(X_i|Y).
     
@@ -30,7 +28,6 @@ def my_func(array_O_words,words_txt, probs_calc,MAPS):
     Ys = []
     #num_of_rows = []
     Hs =[]
-    MAPS = []
     counts = arr.array('i', [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
     #exampleCount = 0
     for col in range(1,61189):
