@@ -52,6 +52,7 @@ def to_sparse_mat_for_conf(file,splitstop):
     #Build Y as described in Proj. 2 description
     Y_np = numpy_array[:,-1]
     numpy_array = numpy_array[:,:-1]
+    orig_X = numpy_array
     rows, columns = numpy_array.shape
 
     unique_classes = len(np.unique([y[0] for y in Y_np.tolist()]))
@@ -85,7 +86,7 @@ def to_sparse_mat_for_conf(file,splitstop):
     # X = (final_array)
     # Y = (Y_np.T)
     print("Done w/ conv\n")
-    return X_sparse, Y_sparse, delta_sparse, unique_classes, Y_np
+    return X_sparse, Y_sparse, delta_sparse, unique_classes, Y_np, orig_X
 
 def to_sparse_mat(file):
     
@@ -278,7 +279,7 @@ def classify(file, W, K):
                 print(ans)
                 solout.writerow(ans)
                 
-def classify_conf(file, W, K):
+def classify_conf(Xs, W, K):
     """
     Classifies testing data using set of weights W. 
     Uses equations 27 and 28 from Mitchell Ch.3 but using sparse matrix multiplication.
@@ -291,54 +292,43 @@ def classify_conf(file, W, K):
     K : int
         Number of unique classes
     """
-    with open(file, newline='') as test_data:
-        preds =[]
-        with open('solution.csv', 'w', newline='') as solution:
-            data_reader = csv.reader(test_data)
-            solout = csv.writer(solution)
-            solout.writerow(['id', 'class'])
+    count = 1
+    ans =[]
+    W_1 = W[:,1:]
 
-            n = W.shape[1] - 1
-            W_1 = W[:,1:]
-            
-            count = 1
-            for example in data_reader:
-                print("Classifying row", count)
-                count += 1
-
-                X = example[1:]
-                X = [int(x) for x in X]
-                X.append(1)
-                X = csr_matrix(X)
-
-                sum_mat = W_1.dot(X.transpose()).todense()
-                sum_mat = np.exp(sum_mat)
+    for example in Xs:
+        print("Classifying row", count)
+        count += 1
+        X = example[1:]
+        X = [int(x) for x in X]
+        X.append(1)
+        X = csr_matrix(X)
+        sum_mat = W_1.dot(X.transpose()).todense()
+        sum_mat = np.exp(sum_mat)
                 
-                c = np.argmax(sum_mat) + 1
-                ans = [int(example[0]), c]
-
+        c = np.argmax(sum_mat) + 1
+        ans.append(c)
+    return ans
                 #Print answer pairs and write to csv
-                print(ans)
-                solout.writerow(ans)
-                preds.append(ans)
-        return preds
+                #print(ans)
+                #solout.writerow(ans)
 
 if __name__ == "__main__":
     #cols_comp =[]
     results = to_sparse_mat("training.csv")
     #results = to_sparse_mat("smalltrain.csv")
-    #text_matrix, total_rows= to_sparse_mat_for_conf('training.csv', 9600)
-    #class_matrix, total_rows_class= to_sparse_mat_for_conf('training.csv', 12000)
-    #cols = results[4]
+    #text_matrix = to_sparse_mat_for_conf('training.csv', 9600)
+    #class_matrix = to_sparse_mat_for_conf('training.csv', 12000)
+    #cols = text_matrix[4]
     #for i in cols:
     #    cols_comp.append(i.item())
-    #new_class_matrix = dropcols_coo(class_matrix, 61189)
+    #new_class_matrix = class_matrix[5]
 
     W = grad_descent(results[0], results[1], results[3], results[2], .001, .001, iterations=1000)
 
     #W = W[:,1:]
     K = results[3] - 1
-    #spec_array = classify_conf(new_class_matrix, p_v, prob_calcs)
+    #spec_array = classify_conf(new_class_matrix, W, K)
     #actual = cols_comp
     #predicted = spec_array
     #disp_label = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]

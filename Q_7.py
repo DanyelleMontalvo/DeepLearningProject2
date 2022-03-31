@@ -43,14 +43,13 @@ def my_func(array_O_words,words_txt, probs_calc,MAPS):
         A = counts.tolist()
         #get probabilities of classes dividing each count by sum of class counts
         A = [x/(sum(A)) for x in A]
-        #61189x20
         Ys.append(A)
         counts[0:19] =0
     for i in range(0,61189):
         Hs.append(entropy(Ys[i]),base =2)
     
     Hs = [-1*Hs[i]*MAPS[i] for i in range(0,len(Hs))]
-    #find max,
+    #find max, append to ans, delete that index, repeat to get the top 100.
     for i in range(0,100):
         ans.append(words[Hs.index(Hs.max)])
         del words[Hs.index(Hs.max)]
