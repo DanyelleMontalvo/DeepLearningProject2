@@ -6,7 +6,7 @@
 
 # About
 
-* This project uses the Naive Bayes Algorithm and Gradient Descent with Logisitc Regression to classify text documents into one of 20 newscast topics. This is done by calculating the probabilities that a word appears in a class based on training data and using these probabilities to predict the probability that the sample belongs to a certain class. Th Logistic Regression algorithm uses gradient Descent to 
+* This project uses the Naive Bayes Algorithm and Gradient Descent with Logisitc Regression to classify text documents into one of 20 newscast topics. This is done by calculating the probabilities that a word appears in a class based on training data and using these probabilities to predict the probability that the sample belongs to a certain class. The Logistic Regression algorithm uses Gradient Descent to minimize our cost function and find an optimal weights, W, that can be then used to in the equation exp(WX<sup>T</sup>) which will then be used to find P(Y|W,X)
 
 # Installation
 
