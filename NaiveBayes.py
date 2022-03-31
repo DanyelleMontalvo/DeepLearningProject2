@@ -181,6 +181,3 @@ for classnum in range(1, 21):
 #disp.plot()
 #plt.show()
 classify('testing 3.csv', p_v, prob_calcs)
-
-
-
