@@ -19,6 +19,7 @@ def csv_to_sparse(csvdoc, colnum, skipstart=0, stopafter=0):
     data_count = []
     rowcount = 0
     #code incorporated from from https://docs.python.org/3/library/csv.html
+    #This code helps create a csr matrix from a csv file
     with open(csvdoc, newline='', encoding='utf-8-sig') as csvfile:
         csvreader = csv.reader(csvfile, delimiter=',')
         filecount = 0
@@ -38,8 +39,6 @@ def csv_to_sparse(csvdoc, colnum, skipstart=0, stopafter=0):
             rowcount = rowcount + 1
     new_matrix = csr_matrix((data_count, (row_count, col_count)), shape=(rowcount, 61190))
     return new_matrix, rowcount
-<<<<<<< Updated upstream
-=======
 
 def dropcols_coo(M, idx_to_drop):
     """
@@ -60,7 +59,8 @@ def classify_conf(class_matrix, p_v, probs_calc):
     Function to classify an input specifically for the confusion matrix
     input csvdoc: an input file that contains data to be classified
     input p_v: The array of probabilities
-    input probs_calc:
+    input probs_calc: array of probabilities
+    output a classified array for the confusion matrix
     """
     max_prob = -1000000
     max_idx = 0
@@ -80,12 +80,10 @@ def classify_conf(class_matrix, p_v, probs_calc):
                 if el == 0:
                     continue
                 else:
-                    #Matrix multiplication possibly?
-                    ## csr_A.multiply(csr_B) will do matrix multiplication between
-                    ##the two sparse matrices.
                     Map_calc = Map_calc + row[idxrow] * int(el)
             Map_calc = Map_calc + p_v[row_count]
             row_count = row_count + 1
+            #Find the maximum probability
             if Map_calc > max_prob:
                 max_prob = Map_calc
                 max_idx = idx + 1
@@ -97,13 +95,13 @@ def classify_conf(class_matrix, p_v, probs_calc):
         max_idx = 0
     return array_classified
 
->>>>>>> Stashed changes
 def classify(csvdoc, p_v, probs_calc):
     """
     Function to classify an input
     input csvdoc: an input file that contains data to be classified
     input p_v: The array of probabilities
-    input probs_calc: array of
+    input probs_calc: array of probabilities
+    output is a csv file called classified.csv that has
     """
     testid = 0
     max_prob = -10000000
@@ -123,21 +121,25 @@ def classify(csvdoc, p_v, probs_calc):
                     if int(el) == 0:
                         continue
                     else:
+                        #calculate probabilities for each feature
                         Map_calc = Map_calc + row[idxrow] * int(el)
+                #Calulate the maximum liklihood estimate
                 Map_calc = Map_calc + p_v[row_count]
                 row_count = row_count + 1
+                #find the class that provides the highest probability
                 if Map_calc > max_prob:
                     max_prob = Map_calc
                     max_idx = idx + 1
                 Map_calc = 0
             row_count = 0
+            #write max class to file
             file_object.write(str(testid) + ","+str(max_idx)+'\n')
             max_prob = -10000000
             max_idx = 0
 
 Vocabulary = 61188
-#beta = 1/Vocabulary
-beta= .0015
+beta = 1/Vocabulary
+#beta= .0015
 #cols_comp = []
 class_wrong = defaultdict(int)
 #array for MLE P(Yk) for each class 1 x 20
@@ -157,8 +159,10 @@ text_matrix, total_rows = csv_to_sparse('training.csv', 61190)
 for classnum in range(1, 21):
     filtered_matrix = text_matrix[text_matrix[:, 61189] == classnum].tolist()[0]
     #code from https://stackoverflow.com/questions/4918425/subtract-a-value-from-every-number-in-a-list-in-python
+    #Subtract the key ids from the data
     filtered_matrix_list = [x - 1 for x in filtered_matrix]
     num_rows = len(filtered_matrix_list)
+    #Take logrithm of the probabilities for future calculations
     probs = math.log2(num_rows/total_rows)
     p_v.append(probs)
     man_data = text_matrix[filtered_matrix_list, :].sum(axis=0).tolist()[0]
@@ -166,9 +170,11 @@ for classnum in range(1, 21):
     del man_data[-1]
     total_words = sum(man_data)
     #used code from https://stackoverflow.com/questions/54629298/how-to-use-vectorized-numpy-operations-on-lambda-functions-that-return-constant
+    #Calculate the probabilities for each class
     func = lambda x: math.log2((x + beta)/(total_words + 1))
     vfunc = np.vectorize(func)
     prob_bayes = vfunc(man_data)
+    #put probabilities in a 1x20 matrix
     prob_calcs.append(prob_bayes)
 #This section is used to create the confusion matrix but is commented out upon submission
 #spec_array = classify_conf(new_class_matrix, p_v, prob_calcs)
@@ -180,7 +186,7 @@ for classnum in range(1, 21):
 #disp = ConfusionMatrixDisplay(confusion_matrix= matrix, display_labels=disp_label)
 #disp.plot()
 #plt.show()
-classify('testing 3.csv', p_v, prob_calcs)
+classify('testing.csv', p_v, prob_calcs)
 
 
 
