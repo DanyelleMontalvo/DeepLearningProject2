@@ -21,7 +21,7 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from pprint import pprint
 import matplotlib.pyplot as plt
 
-def to_sparse_mat_for_conf(file,splitstop):
+def to_sparse_mat_for_conf(file,skipstart,stopafter):
     
     col_count = []
     row_count = []
@@ -31,10 +31,12 @@ def to_sparse_mat_for_conf(file,splitstop):
     #Thanks Danyelle (:
     with open(file, newline='', encoding='utf-8-sig') as csvfile:
         csvreader = csv.reader(csvfile, delimiter=',')
+        filecount = 0
         for row in csvreader:
-            if int(row[0]) >= splitstop:
-            #if int(row[0]) >= 10:
-  
+            filecount = filecount+1
+            if filecount < skipstart:
+                continue
+            if rowcount >= stopafter and stopafter > 0:
                 break
             for idx, el in enumerate(row):
                 if int(el) == 0:
@@ -295,14 +297,17 @@ def classify_conf(Xs, W, K):
     count = 1
     ans =[]
     W_1 = W[:,1:]
+    print(W_1.shape,Xs.shape)
 
     for example in Xs:
         print("Classifying row", count)
+        print(example.shape)
         count += 1
-        X = example[1:]
-        X = [int(x) for x in X]
-        X.append(1)
+        X = example
+        #X = [int(x) for x in X]
+        #X.append(1)
         X = csr_matrix(X)
+        print(X.shape)
         sum_mat = W_1.dot(X.transpose()).todense()
         sum_mat = np.exp(sum_mat)
                 
@@ -314,28 +319,36 @@ def classify_conf(Xs, W, K):
                 #solout.writerow(ans)
 
 if __name__ == "__main__":
-    #cols_comp =[]
-    results = to_sparse_mat("training.csv")
+    cols_comp =[]
+    
+    #results = to_sparse_mat("/home/jared/Downloads/training.csv")
+    
     #results = to_sparse_mat("smalltrain.csv")
-    #text_matrix = to_sparse_mat_for_conf('training.csv', 9600)
-    #class_matrix = to_sparse_mat_for_conf('training.csv', 12000)
-    #cols = text_matrix[4]
-    #for i in cols:
-    #    cols_comp.append(i.item())
-    #new_class_matrix = class_matrix[5]
+    text_matrix = to_sparse_mat_for_conf('/home/jared/Downloads/training.csv',0, 6000)
+    #class_matrix = to_sparse_mat_for_conf('/home/jared/Downloads/training.csv',6001, 12000)
+    cols = text_matrix[4]
+    for i in cols:
+        cols_comp.append(i.item())
+    new_class_matrix = text_matrix[0]
 
-    W = grad_descent(results[0], results[1], results[3], results[2], .001, .001, iterations=1000)
+    #W = grad_descent(results[0], results[1], results[3], results[2], .001, .001, iterations=1000)
+    
+    W = grad_descent(text_matrix[0], text_matrix[1], text_matrix[3], text_matrix[2], .001, .001, iterations=1000)
 
     #W = W[:,1:]
-    K = results[3] - 1
-    #spec_array = classify_conf(new_class_matrix, W, K)
-    #actual = cols_comp
-    #predicted = spec_array
-    #disp_label = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-    #matrix = confusion_matrix(actual,predicted, labels=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,18, 19, 20])
-    #print(matrix)
-    #disp = ConfusionMatrixDisplay(confusion_matrix= matrix, display_labels=disp_label)
-    #disp.plot()
-    #plt.show()
-    classify("testing.csv", W, K)
+    
+    #K = results[3] - 1
+    
+    spec_array = classify_conf(new_class_matrix, W, 20)
+    actual = cols_comp
+    predicted = spec_array
+    disp_label = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+    matrix = confusion_matrix(actual,predicted, labels=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,18, 19, 20],normalize='true')
+    print(matrix)
+    disp = ConfusionMatrixDisplay(confusion_matrix= matrix, display_labels=disp_label)
+    disp.plot()
+    plt.show()
+    
+    #classify("testing.csv", W, K)
+    
     #classify("smalltest.csv", W, K)
