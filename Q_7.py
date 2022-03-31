@@ -28,13 +28,13 @@ def my_func(array_O_words,words_txt, probs_calc,MAPS):
     #ordered words from vocabulary.txt
     words = np.loadtxt("example3.txt", usecols=1, skiprows=1, dtype='str')
     Ys = []
-    num_of_rows = []
+    #num_of_rows = []
     Hs =[]
     MAPS = []
     counts = arr.array('i', [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
     #exampleCount = 0
     for col in range(1,61189):
-        for row in range(0,len(num_of_rows)):
+        for row in range(0,len(12000)):
             #If x_i for example j >0, find class it belongs to, increment index
             #equivalent to (class # -1) by 1 to have number for each count given 
             #this x_i
