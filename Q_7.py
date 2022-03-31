@@ -10,7 +10,7 @@ def my_func(array_O_words,words_txt, probs_calc,MAPS):
     ----------
     array_O_words : Array
         Array representing the original data set including the true classes.
-    words_txt : .txt file
+    words_txt : path to vocabulary.txt file
         .txt file holding ordered set of vocabulary.
     probs_calc : TYPE
         DESCRIPTION.
@@ -26,7 +26,7 @@ def my_func(array_O_words,words_txt, probs_calc,MAPS):
     print("Start")
     ans =[]
     #ordered words from vocabulary.txt
-    words = np.loadtxt("example3.txt", usecols=1, skiprows=1, dtype='str')
+    words = np.loadtxt(words_txt, usecols=1, skiprows=1, dtype='str')
     Ys = []
     #num_of_rows = []
     Hs =[]
