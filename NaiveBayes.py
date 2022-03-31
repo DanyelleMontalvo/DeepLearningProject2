@@ -38,8 +38,7 @@ def csv_to_sparse(csvdoc, colnum, skipstart=0, stopafter=0):
             rowcount = rowcount + 1
     new_matrix = csr_matrix((data_count, (row_count, col_count)), shape=(rowcount, 61190))
     return new_matrix, rowcount
-<<<<<<< Updated upstream
-=======
+
 
 def dropcols_coo(M, idx_to_drop):
     """
@@ -97,7 +96,6 @@ def classify_conf(class_matrix, p_v, probs_calc):
         max_idx = 0
     return array_classified
 
->>>>>>> Stashed changes
 def classify(csvdoc, p_v, probs_calc):
     """
     Function to classify an input
@@ -144,7 +142,7 @@ class_wrong = defaultdict(int)
 p_v = []
 #array for MaP for P(X|Y) for each class Size 20 x 61188
 prob_calcs = []
-text_matrix, total_rows = csv_to_sparse('training.csv', 61190)
+text_matrix, total_rows = csv_to_sparse('/home/jared/Downloads/training.csv', 61190)
 #These are used for the confusion matrix calculations
 #text_matrix, total_rows= csv_to_sparse('training.csv', 61190, 0, 9600)
 #class_matrix, total_rows_class= csv_to_sparse('training.csv', 61190, 9601, 12000)
@@ -180,4 +178,4 @@ for classnum in range(1, 21):
 #disp = ConfusionMatrixDisplay(confusion_matrix= matrix, display_labels=disp_label)
 #disp.plot()
 #plt.show()
-classify('testing 3.csv', p_v, prob_calcs)
+classify('/home/jared/Downloads/testing.csv', p_v, prob_calcs)
