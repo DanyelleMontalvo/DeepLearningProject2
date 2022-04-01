@@ -47,18 +47,20 @@ def my_func(array_O_words,words_txt,MAPS):
                 counts[int(array_O_words[row][-1])-1] = counts[int(array_O_words[row][-1])-1]+1
         A = counts.tolist()
         #get probabilities of classes dividing each count by sum of class counts
-        A = [x/(sum(A)) for x in A]
+        A = [x/(sum(A)) if sum(A) >0 else x for x in A]
         Ys.append(A)
         for i in range(0,20):
             counts[i] =0
-    for i in range(0,61189):
-        Hs.append(entropy(Ys[i]),base =2)
-    
+    print(np.shape(Ys))
+    for i in range(0,len(Ys)):
+        Hs.append(entropy(Ys[i],base =2))
+    print(np.shape(Hs),np.shape(MAPS))
     Hs = [-1*Hs[i]*MAPS[i] for i in range(0,len(Hs))]
     #find max, append to ans, delete that index, repeat to get the top 100.
+    Hs =arr.array('i').fromlist(words.tolist())
     for i in range(0,100):
-        ans.append(words[Hs.index(Hs.max)])
-        del words[Hs.index(Hs.max)]
+        ans.append(words[Hs.index(max(Hs))])
+        Hs[Hs.index(max(Hs))] = -1000000
     print(ans)
     """
     Pseudo-code
@@ -226,7 +228,7 @@ for classnum in range(1, 21):
     prob_bayes = vfunc(man_data)
     prob_calcs.append(prob_bayes)
     
-my_func(text_matrix.toarray(), '/home/jared/Downloads/vocabulary.txt', prob_calcs)
+my_func(text_matrix.toarray(), '/home/jared/Downloads/vocabulary.txt', prob_bayes)
 #This section is used to create the confusion matrix but is commented out upon submission
 #spec_array = classify_conf(new_class_matrix, p_v, prob_calcs)
 #actual = cols_comp
