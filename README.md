@@ -12,6 +12,8 @@
 
 To install this project, you can clone the git repo to your local machine or, in GitHub, under the ```Code``` tab, click on the Green Code button, and the choose ```Download Zip```. 
 
+The testing file and training file must be downloaded from: https://www.kaggle.com/competitions/cs529-project-2-nb/data. 
+Files are too large to include in our repo but must be placed in the same working directory as the rest of the project
 ![](Resources/codebutton.png)
 
 # Usage 
