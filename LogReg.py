@@ -330,9 +330,9 @@ if __name__ == "__main__":
     
     #W = grad_descent(text_matrix[0], text_matrix[1], text_matrix[3], text_matrix[2], .001, .001, iterations=1000)
 
-    #W = W[:,1:]
+    W = W[:,1:]
     
-    #K = results[3] - 1
+    K = results[3] - 1
     
     #spec_array = classify_conf(new_class_matrix, W, 20)
     #actual = cols_comp
