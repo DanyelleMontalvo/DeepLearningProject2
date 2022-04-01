@@ -57,11 +57,18 @@ def my_func(array_O_words,words_txt,MAPS):
     print(np.shape(Hs),np.shape(MAPS))
     Hs = [-1*Hs[i]*MAPS[i] for i in range(0,len(Hs))]
     #find max, append to ans, delete that index, repeat to get the top 100.
-    Hs =arr.array('i').fromlist(words.tolist())
-    for i in range(0,100):
-        ans.append(words[Hs.index(max(Hs))])
-        Hs[Hs.index(max(Hs))] = -1000000
-    print(ans)
+    Hs =np.array(Hs)
+
+    n = 100
+
+    indices = (-Hs).argsort()[:n]
+    for idx in indices:
+        ans.append(idx)
+    print(ans,"\n")
+    sol =[]
+    for i in ans:
+        sol.append(words[i])
+    print(sol)
     """
     Pseudo-code
     -Entropy(P(Y|x_i)) * MAP est
